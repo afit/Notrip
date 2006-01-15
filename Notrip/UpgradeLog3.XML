@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?>
+<UpgradeLog>
+<Properties><Property Name="Solution" Value="Notrip">
+</Property><Property Name="Solution File" Value="C:\Documents and Settings\Aidan Fitzpatrick\Desktop\Notrip\Notrip.sln">
+</Property><Property Name="Date" Value="08 January 2006">
+</Property><Property Name="Time" Value="21:56:50">
+</Property><Property Name="Log Number" Value="3">
+</Property></Properties><Event ErrorLevel="1" Project="C:\Documents and Settings\Aidan Fitzpatrick\Desktop\MixerTest\MixerTest.csproj" Source="..\MixerTest\MixerTest.csproj" Description="MSB2014: The project-to-project reference with GUID {6F3FA628-01C6-48AF-9D1A-9BB1EAF8D259} cannot be converted because it is not listed in the file 'C:\Documents and Settings\Aidan Fitzpatrick\Desktop\Notrip\Notrip.sln'.">
+</Event><Event ErrorLevel="0" Project="MixerTest" Source="..\MixerTest\MixerTest.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="MixerTest" Source="..\MixerTest\MixerTest.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="MixerTest" Source="..\MixerTest\MixerTest.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>
