@@ -27,12 +27,15 @@ namespace LothianProductions.Notrip {
 			// 
 			// StringedInstrument
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Name = "StringedInstrument";
-			this.Resize += new System.EventHandler( this.StringedInstrument_Resize );
-			this.Paint += new System.Windows.Forms.PaintEventHandler( this.StringedInstrument_Paint );
-			this.ResumeLayout( false );
+			this.Load += new System.EventHandler(this.StringedInstrument_Load);
+			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.StringedInstrument_MouseMove);
+			this.Resize += new System.EventHandler(this.StringedInstrument_Resize);
+			this.Paint += new System.Windows.Forms.PaintEventHandler(this.StringedInstrument_Paint);
+			this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.StringedInstrument_MouseUp);
+			this.ResumeLayout(false);
 
 		}
 
