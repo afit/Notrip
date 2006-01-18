@@ -30,7 +30,6 @@ namespace LothianProductions.Notrip {
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Name = "StringedInstrument";
-			this.Load += new System.EventHandler(this.StringedInstrument_Load);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.StringedInstrument_MouseMove);
 			this.Resize += new System.EventHandler(this.StringedInstrument_Resize);
 			this.Paint += new System.Windows.Forms.PaintEventHandler(this.StringedInstrument_Paint);

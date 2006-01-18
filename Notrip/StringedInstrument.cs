@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.Threading;
 using System.Text;
 using System.Windows.Forms;
 
 namespace LothianProductions.Notrip {
 	public partial class StringedInstrument : UserControl {
 		public StringedInstrument() {
+			mNoteLabels = new String[Strings.Length, Frets];
+
 			InitializeComponent();
 		}
 
@@ -21,12 +24,10 @@ namespace LothianProductions.Notrip {
 			new InstrumentString( Note.B, 2 ),
 			new InstrumentString( Note.E, 7 )
 		};
-		protected IList<int[]> mSelectedNotes = new List<int[]>();
-		protected int[] mSelectedNote = new int[] { 0, 0 };
-		protected int oldX;
-		protected int oldY;
-		protected string[,] notes;
-		Font noteFont = new Font("Arial", 8);
+		protected int mLastFret;
+		protected int mLastInstrumentString;
+		protected String[,] mNoteLabels;
+		protected Dictionary<String, BeepCl> mBeeps = new Dictionary<string,BeepCl>();
 
 		public InstrumentString[] Strings {
 			get{ return mStrings; }
@@ -70,7 +71,6 @@ namespace LothianProductions.Notrip {
 			int spacingStrings = Height / ( Strings.Length + 1 );
 			
 			for( int i = 0; i < Strings.Length; i++ ) {
-				//InstrumentString instrumentString = Strings[ i ];
 				Point[] points = new Point[] {
 					new Point( 0, spacingStrings * (i + 1) ),
 					new Point( Width, spacingStrings * (i + 1) )
@@ -78,34 +78,56 @@ namespace LothianProductions.Notrip {
 				g.DrawLines( pen, points );
 			}
 
-			int numberOfNotes = Enum.GetValues(typeof(Note)).Length;
-			int intNoteCounter = 0;
-			for (int i = 0; i < Strings.Length; i++) {
-				InstrumentString instrumentString = Strings[i];
-				int rootNote = (int)instrumentString.RootNote;
-				intNoteCounter = rootNote;
-				for (int ii = 0; ii < Frets; ii++) {
-					string noteName = Enum.GetName( typeof(Note), intNoteCounter );
-					noteName = noteName.Replace("sharp", "#");
-					noteName = noteName.Replace("flat", "b");
-					intNoteCounter++;
-					if ( intNoteCounter == numberOfNotes )
-						intNoteCounter = 0;
-					int noteTextWidth = g.MeasureString( noteName, noteFont ).ToSize().Width;
-					int noteTextHeight = g.MeasureString( noteName, noteFont ).ToSize().Height;
-					int fretX = (spacingFrets * (ii + 1));
-					int stringY = (spacingStrings * (i + 1));
-					float x = fretX - (noteTextWidth / 2);
-					float y = stringY - (noteTextHeight / 2);
-					g.FillEllipse(Brushes.White, fretX - 8, stringY - 8, 16, 16);
-					g.DrawEllipse(Pens.Blue, fretX - 8, stringY - 8, 16, 16);
-					g.DrawString(noteName, noteFont, Brushes.Black, x, y);
-					notes[i, ii] = noteName;
+			// Draw fingerings on each string for each fret.
+			int note;
+			for( int i = 0; i < Strings.Length; i++ ) {
+				note = (int) Strings[i].RootNote;
+				
+				for( int ii = 0; ii < Frets; ii++ ) {	
+					mNoteLabels[i, ii] = Enum.GetName( typeof(Note), note++ ).Replace( "sharp", "#" ).Replace( "flat", "b" );
+
+					// Loop notes back to start.
+					if( note == Enum.GetValues( typeof(Note) ).Length )
+						note = 0;
+					
+					DrawFingering( Graphics.FromHwnd( Handle ), i + 1, ii + 1, Brushes.White );
 				}
 			}
+		}
+		
+		protected void DrawFingering( Graphics g, int instrumentString, int fret, Brush brush ) {
+			int spacingFrets = Width / ( Frets + 1 );
+			int spacingStrings = Height / ( Strings.Length + 1 );
+			int stringY = spacingStrings * instrumentString;
+			int fretX = spacingFrets * fret;
+			
+			g.FillEllipse( brush, fretX - 10, stringY - 10, 20, 20 );
+			g.DrawString( mNoteLabels[instrumentString - 1, fret - 1], Font, Brushes.Black, fretX - (g.MeasureString( mNoteLabels[instrumentString - 1, fret - 1], Font ).ToSize().Width / 2), stringY - (g.MeasureString( mNoteLabels[instrumentString - 1, fret - 1], Font ).ToSize().Height / 2) );
+		}
 
-			drawSelectedNotes();
-
+		protected void PlayNote( int fret, int instrumentString, int duration ) {
+			// Create a new beep object and fire it off on a separate thread.
+			lock( mBeeps ) {
+				BeepCl beep;
+				if( mBeeps.ContainsKey( fret + ":" + instrumentString ) )
+					beep = mBeeps[ fret + ":" + instrumentString ];
+				else {
+					double steps = Strings[instrumentString - 1].RootSteps + fret - 1;		
+					beep = new BeepCl( this );
+					mBeeps.Add( fret + ":" + instrumentString, beep );
+					beep.Frequency = ROOT_FREQ * Math.Pow(2, steps / 12);
+				}
+				
+				//if( beep.
+				//beep.StartOrStopPlay( false );
+				beep.Duration = duration;
+				new Thread( new ThreadStart( beep.Beep ) ).Start();
+			}
+		}
+		
+		protected void FindFingering( int x, int y, out int fret, out int instrumentString ) {
+			fret = (int) Math.Round( (float) x / (float) (Width / (Frets + 1)), 0 );
+			instrumentString = (int) Math.Round( (float) y / (float) (Height / (Strings.Length + 1)), 0 );
 		}
 
 		private void StringedInstrument_Resize( object sender, EventArgs e ) {
@@ -113,83 +135,32 @@ namespace LothianProductions.Notrip {
 		}
 
 		private void StringedInstrument_MouseUp(object sender, MouseEventArgs e) {
-			int spacingFrets = Width / (Frets + 1);
-			int spacingStrings = Height / (Strings.Length + 1);
-			float fretX = (float)e.X / (float)spacingFrets;
-			float stringsY = (float)e.Y / (float)spacingStrings;
-			int x = (int)Math.Round(fretX, 0);
-			int y = (int)Math.Round(stringsY,0);
-			System.Diagnostics.Debug.WriteLine("X: " + x + " - Y: " + y + " - Mouse X: " + e.X + " - Mouse Y: " + e.Y + " Fret X: " + fretX + " - Spacing Y: " + stringsY);
-			int chosenFret = x;
-			int chosenString = y;
-			int[] note = new int[] { chosenFret, chosenString };
-			if (mSelectedNotes.Contains(note)) {
-				mSelectedNotes.Remove(note);
-			} else {
-				mSelectedNotes.Add(note);
-			}
-			drawSelectedNotes();
-			playNote(x, y);
+			int fret, instrumentString;
+			FindFingering( e.X, e.Y, out fret, out instrumentString );
+			
+			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length )
+				if( e.Button == MouseButtons.Left )
+					PlayNote( fret, instrumentString, 500 );
+				else if( e.Button == MouseButtons.Right )
+					PlayNote( fret, instrumentString, 0 );
 		}
 
 		private void StringedInstrument_MouseMove(object sender, MouseEventArgs e) {
-			int spacingFrets = Width / (Frets + 1);
-			int spacingStrings = Height / (Strings.Length + 1);
-			float fretX = (float)e.X / (float)spacingFrets;
-			float stringsY = (float)e.Y / (float)spacingStrings;
-			int x = (int)Math.Round(fretX, 0);
-			int y = (int)Math.Round(stringsY, 0);
-			if ( ( x != oldX || y != oldY)  ) {
-				moveFret(x, y, oldX, oldY);
-				oldX = x;
-				oldY = y;
+			int fret, instrumentString;
+			FindFingering( e.X, e.Y, out fret, out instrumentString );
+			
+			// If the fingered note has changed:
+			if( fret != mLastFret || instrumentString != mLastInstrumentString ) {			
+				// Highlight selected note.
+				if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length )
+					DrawFingering( Graphics.FromHwnd( Handle ), instrumentString, fret, Brushes.SlateBlue );
+				// White out old note.
+				if( mLastFret - 1 >= 0 && mLastInstrumentString - 1 >= 0 && mLastFret - 1 < Frets && mLastInstrumentString - 1 < Strings.Length )
+				    DrawFingering( Graphics.FromHwnd( Handle ), mLastInstrumentString, mLastFret, Brushes.White );
+				
+				mLastFret = fret;
+				mLastInstrumentString = instrumentString;
 			}
-		}
-
-		private void moveFret(int x, int y, int oldX, int oldY) {
-			x -= 1;
-			y -= 1;
-			oldX -= 1;
-			oldY -= 1;
-			int spacingFrets = Width / (Frets + 1);
-			int spacingStrings = Height / (Strings.Length + 1);
-			Graphics g = this.CreateGraphics();
-			if (x >= 0 && y >= 0 && x < Frets && y < Strings.Length )
-				g.FillEllipse(Brushes.SlateBlue, (spacingFrets * (x + 1)) - 8, (spacingStrings * (y + 1)) - 8, 16, 16);
-			if (oldX >= 0 && oldY >= 0 && oldX < Frets && oldY < Strings.Length ) {
-				g.FillEllipse(Brushes.White, (spacingFrets * (oldX + 1)) - 8, (spacingStrings * (oldY + 1)) - 8, 16, 16);
-				int noteTextWidth = g.MeasureString(notes[oldY, oldX], noteFont).ToSize().Width;
-				int noteTextHeight = g.MeasureString(notes[oldY, oldX], noteFont).ToSize().Height;
-				g.DrawString(notes[oldY, oldX], noteFont, Brushes.Black, (spacingFrets * (oldX + 1)) - ( noteTextWidth / 2), (spacingStrings * (oldY + 1)) - ( noteTextHeight / 2));
-				drawSelectedNotes();
-			}
-		}
-
-		private void drawSelectedNotes() {
-			int spacingFrets = Width / (Frets + 1);
-			int spacingStrings = Height / (Strings.Length + 1);
-			Graphics g = this.CreateGraphics();
-			Brush b = Brushes.Blue;
-			foreach (int[] note in mSelectedNotes) {
-				int instrumentString = note[0];
-				int instrumentFret = note[1];
-				int x = spacingFrets * instrumentString - 5;
-				int y = spacingStrings * instrumentFret - 5;
-				g.FillEllipse(b, x, y, 10, 10);
-			}
-		}
-
-		private void playNote(int x, int y) {
-			InstrumentString instrumentString = Strings[y - 1];
-			double steps = instrumentString.RootSteps + x - 1;
-			double freq = ROOT_FREQ * Math.Pow(2, steps / 12);
-			BeepCl beeper = new BeepCl();
-			beeper.Beep(freq, 500);
-		}
-
-		private void StringedInstrument_Load(object sender, EventArgs e) {
-			if (notes == null)
-				notes = new String[Strings.Length, Frets];
 		}
 	}
 }

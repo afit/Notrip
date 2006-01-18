@@ -12,6 +12,7 @@ namespace LothianProductions.Notrip {
 
 		protected static readonly AudioMonitor mInstance = new AudioMonitor();
 		protected const int NO_RECORD_NOTIFICATIONS = 16;
+		protected const int BITS_PER_BYTE = 8;
 
 		public static AudioMonitor Instance() {
 			return mInstance;
@@ -38,16 +39,16 @@ namespace LothianProductions.Notrip {
 			// buffer to start recording   
 			WaveFormat format = new WaveFormat();
 			format.FormatTag = WaveFormatTag.Pcm;
-			format.SamplesPerSecond = 8000;//22050;
+			format.SamplesPerSecond = 22000;//8000;
 			format.BitsPerSample = 8;
 			format.Channels = 1;
-			format.BlockAlign = (short) (format.Channels * (format.BitsPerSample / 8));
+			format.BlockAlign = (short) (format.Channels * (format.BitsPerSample / BITS_PER_BYTE));
 			format.AverageBytesPerSecond = format.BlockAlign * format.SamplesPerSecond;
 
 			// Set the notification size
-			notifySize = (1024 > format.AverageBytesPerSecond / 8) ? 1024 : (format.AverageBytesPerSecond / 8);
+			notifySize = (1024 > format.AverageBytesPerSecond / BITS_PER_BYTE) ? 1024 : (format.AverageBytesPerSecond / BITS_PER_BYTE);
+			//notifySize = 512;
 			notifySize -= notifySize % format.BlockAlign;   
-			Console.WriteLine( "blockAlign: " + format.BlockAlign + ", notifySize: " + notifySize );
 
 			CaptureBufferDescription bufferDescription = new CaptureBufferDescription();
 			// Set the buffer sizes
@@ -70,7 +71,6 @@ namespace LothianProductions.Notrip {
 			
 			for( int i = 0; i < NO_RECORD_NOTIFICATIONS; i++ ) {
 				positionNotify[i].Offset = (notifySize * i) + notifySize - 1;
-				Console.WriteLine( "positionNotify: " + i + ", " + positionNotify[i].Offset );
 				positionNotify[i].EventNotifyHandle = notificationEvent.Handle;
 			}
 			
@@ -82,15 +82,16 @@ namespace LothianProductions.Notrip {
 		}
 		
 		public void Stop() {
+			mRunning = false;
+			
 			// Stop the buffer
 			mCaptureBuffer.Stop();
-			mRunning = false;
 			
 			// Trigger event again...
 			notificationEvent.Set();
 			
 			// Read any data missed earlier
-			Process();
+			//Process();
 		}
 
 		protected void Process() {
@@ -122,7 +123,7 @@ namespace LothianProductions.Notrip {
 				nextCaptureOffset += captureData.Length; 
 				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer			
 				
-				Console.WriteLine( readPos + ":" + capturePos + ":" + captureData.Length + ":" + lockSize + ":" + nextCaptureOffset );
+				//Console.WriteLine( captureData.Length );
 				
 				AudioDataUpdate( captureData );
 			} while( mRunning );

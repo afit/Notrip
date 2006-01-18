@@ -31,6 +31,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="Microsoft.DirectX.DirectSound, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -41,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioMonitor.cs" />
+    <Compile Include="BeepCl.cs">
+    </Compile>
     <Compile Include="ControlForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -49,11 +52,21 @@
     </Compile>
     <Compile Include="InstrumentString.cs" />
     <Compile Include="Note.cs" />
+    <Compile Include="Oscilloscope.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Oscilloscope.Designer.cs">
+      <DependentUpon>Oscilloscope.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ControlForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ControlForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Oscilloscope.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Oscilloscope.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -83,8 +96,6 @@
     </Compile>
     <Compile Include="StringedInstrument.Designer.cs">
       <DependentUpon>StringedInstrument.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Test.cs">
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
