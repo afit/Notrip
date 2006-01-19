@@ -44,5 +44,17 @@ namespace LothianProductions.Notrip {
 				);
 			} catch(ObjectDisposedException ) {}
 		}
+
+		private void CheckLefthanded_CheckedChanged( object sender, EventArgs e ) {
+			InstrumentMain.LeftHanded = CheckLefthanded.Checked;
+		}
+
+		private void NumericStrings_ValueChanged(object sender, EventArgs e) {
+			if( NumericStrings.Value > InstrumentMain.Strings.Count )
+			    InstrumentMain.Strings.Add( new InstrumentString( Note.E, 7 ) );
+			else
+			    InstrumentMain.Strings.RemoveAt( InstrumentMain.Strings.Count - 1 );
+			InstrumentMain.Invalidate();
+		}
 	}
 }

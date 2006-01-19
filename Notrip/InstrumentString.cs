@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace LothianProductions.Notrip {
+	[Serializable()]
 	public class InstrumentString {
+
+		public InstrumentString() {
+			mNote = Note.E;
+			mStep = 7;
+		}
 
 		public InstrumentString( Note note, int steps ) {
 			mNote = note;
