@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace LothianProductions.Notrip {
-	public enum Note {
+
+	[Serializable()]
+	public enum Note : int {
 		A,
 		Bflat,
 		B,

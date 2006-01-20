@@ -29,9 +29,7 @@ namespace LothianProductions.Notrip {
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.Name = "Oscilloscope";
-			this.Size = new System.Drawing.Size( 148, 148 );
 			this.Resize += new System.EventHandler( this.Oscilloscope_Resize );
 			this.ResumeLayout( false );
 

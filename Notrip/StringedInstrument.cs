@@ -3,35 +3,29 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Text;
 using System.Windows.Forms;
 
 namespace LothianProductions.Notrip {
+	[Serializable()]
 	public partial class StringedInstrument : UserControl {
+		
 		public StringedInstrument() {
-			mStrings = new List<InstrumentString>();
-			mStrings.Add( new InstrumentString( Note.E, -17 ) );
-			mStrings.Add(  new InstrumentString( Note.A, -12 ) );
-			mStrings.Add(  new InstrumentString( Note.D, -7 ) );
-			mStrings.Add( new InstrumentString( Note.G, -2 ) );
-			mStrings.Add( new InstrumentString( Note.B, 2 ) );
-			mStrings.Add( new InstrumentString( Note.E, 7 ) );
-			
-
-//			mStrings = new InstrumentString[] {
-//				new InstrumentString( Note.E, -17 ),
-//				new InstrumentString( Note.A, -12 ),
-//				new InstrumentString( Note.D, -7 ),
-//				new InstrumentString( Note.G, -2 ),
-//				new InstrumentString( Note.B, 2 ),
-//				new InstrumentString( Note.E, 7 )
-//			};
+			mStrings = new InstrumentString[] {
+				new InstrumentString( Note.E, -17 ),
+				new InstrumentString( Note.A, -12 ),
+				new InstrumentString( Note.D, -7 ),
+				new InstrumentString( Note.G, -2 ),
+				new InstrumentString( Note.B, 2 ),
+				new InstrumentString( Note.E, 7 )
+			};
 			mFrets = 24;
 			mCapo = 0;
 			mHorizontal = true;
 			
-			mNoteLabels = new String[mStrings.Count, mFrets];
+			mNoteLabels = new String[mStrings.Length, mFrets];
 			
 			InitializeComponent();
 		}
@@ -43,8 +37,8 @@ namespace LothianProductions.Notrip {
 		protected Dictionary<String, BeepCl> mBeeps = new Dictionary<string,BeepCl>();
 
 		//protected InstrumentString[] mStrings;
-		protected List<InstrumentString> mStrings;
-		public List<InstrumentString> Strings {
+		protected InstrumentString[] mStrings;
+		public InstrumentString[] Strings {
 			get{ return mStrings; }
 			set{
 				mStrings = value;
@@ -112,18 +106,18 @@ namespace LothianProductions.Notrip {
 		}
 		
 		protected void FindFingering( int x, int y, out int fret, out int instrumentString ) {
-			if( Strings.Count == 0 || Frets == 0 ) {
+			if( Strings.Length == 0 || Frets == 0 ) {
 				fret = 0;
 				instrumentString = 0;
 			} else {
 				fret = (int) Math.Round( (float) x / (float) (Width / (Frets + 1)), 0 );
-				instrumentString = (int) Math.Round( (float) y / (float) (Height / (Strings.Count + 1)), 0 );
+				instrumentString = (int) Math.Round( (float) y / (float) (Height / (Strings.Length + 1)), 0 );
 			}
 		}
 
 		protected void DrawFingering( Graphics g, int instrumentString, int fret, Brush brush ) {
 			int spacingFrets = Width / ( Frets + 1 );
-			int spacingStrings = Height / ( Strings.Count + 1 );
+			int spacingStrings = Height / ( Strings.Length + 1 );
 			int stringY = spacingStrings * instrumentString;
 			int fretX = spacingFrets * fret;
 			
@@ -138,7 +132,7 @@ namespace LothianProductions.Notrip {
 			// Add one to the number to find the spacing, so
 			// that there's an equal space at the top and bottom.
 			int spacingFrets = Width / ( Frets + 1 );
-			int spacingStrings = Height / ( Strings.Count + 1 );
+			int spacingStrings = Height / ( Strings.Length + 1 );
 			for( int i = 0; i < Frets; i++ ) {
 				Point[] points = new Point[] {
 					new Point( spacingFrets * (i + 1), spacingStrings ),
@@ -155,7 +149,7 @@ namespace LothianProductions.Notrip {
 			else
 				startString = spacingFrets;
 			
-			for( int i = 0; i < Strings.Count; i++ ) {
+			for( int i = 0; i < Strings.Length; i++ ) {
 				Point[] points = new Point[] {
 					new Point( startString, spacingStrings * (i + 1) ),
 					new Point( endString, spacingStrings * (i + 1) )
@@ -168,9 +162,9 @@ namespace LothianProductions.Notrip {
 			int[] stringHanding, fretHanding;
 			
 			if( ! mLeftHanded )
-				stringHanding = new int[]{ 0, Strings.Count, 1 };
+				stringHanding = new int[]{ 0, Strings.Length, 1 };
 			else
-				stringHanding = new int[]{ Strings.Count - 1, -1, -1 };
+				stringHanding = new int[]{ Strings.Length - 1, -1, -1 };
 
 			if( ! mLeftHanded )
 				fretHanding = new int[]{ 0, Frets, 1 };
@@ -191,7 +185,7 @@ namespace LothianProductions.Notrip {
 					DrawFingering( Graphics.FromHwnd( Handle ), i + 1, ii + 1, Brushes.White );
 
 					if( i == stringHanding[0] ) {
-						int stringY = spacingStrings * (Strings.Count + 1);
+						int stringY = spacingStrings * (Strings.Length + 1);
 						int fretX = spacingFrets * (ii + 1);
 						String fretNo = Math.Abs( ii + 1 - (mLeftHanded ? mFrets + 1 : 0) ) + "";
 						g.DrawString(
@@ -212,7 +206,7 @@ namespace LothianProductions.Notrip {
 			int fret, instrumentString;
 			FindFingering( e.X, e.Y, out fret, out instrumentString );
 			
-			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Count )
+			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length )
 				if( e.Button == MouseButtons.Left )
 					PlayNote( fret, instrumentString, 500 );
 				else if( e.Button == MouseButtons.Right )
@@ -226,10 +220,10 @@ namespace LothianProductions.Notrip {
 			// If the fingered note has changed:
 			if( fret != mLastFret || instrumentString != mLastInstrumentString ) {			
 				// Highlight selected note.
-				if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Count )
+				if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length )
 					DrawFingering( Graphics.FromHwnd( Handle ), instrumentString, fret, Brushes.SlateBlue );
 				// White out old note.
-				if( mLastFret - 1 >= 0 && mLastInstrumentString - 1 >= 0 && mLastFret - 1 < Frets && mLastInstrumentString - 1 < Strings.Count )
+				if( mLastFret - 1 >= 0 && mLastInstrumentString - 1 >= 0 && mLastFret - 1 < Frets && mLastInstrumentString - 1 < Strings.Length )
 				    DrawFingering( Graphics.FromHwnd( Handle ), mLastInstrumentString, mLastFret, Brushes.White );
 				
 				mLastFret = fret;

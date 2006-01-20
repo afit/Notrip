@@ -25,10 +25,15 @@ namespace LothianProductions.Notrip {
 		public void AddSamples( byte[] samples ) {
 			// No need to scale -- either we distort the graph and ruin the scale
 			// or we slow down the rendering. Skipping >Width is healthy.
-			for( int i = 0; i < (samples.Length > mPoints.Length ? mPoints.Length : samples.Length); i++ ) {
+			//for( int i = 0; i < (samples.Length > mPoints.Length ? mPoints.Length : samples.Length); i++ ) {
+			//    mPoints[ i ].X = i;
+			//    mPoints[ i ].Y = samples[i];
+			//}
+			for( int i = 0; i < mPoints.Length; i++ ) {
 			    mPoints[ i ].X = i;
-			    mPoints[ i ].Y = samples[i];
+			    mPoints[ i ].Y = (int) (samples[i * (samples.Length / Width)] * ((float) Height / 256f));
 			}
+
 
 		    mBufferGraphics.Clear( BackColor );
 		    mBufferGraphics.DrawLines( mPen, mPoints );

@@ -5,11 +5,12 @@
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{08782512-1252-4F45-B665-B6D7485CD6E5}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LothianProductions.Notrip</RootNamespace>
     <AssemblyName>Notrip</AssemblyName>
-    <StartupObject>LothianProductions.Notrip.Program</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,32 +42,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioMonitor.cs" />
+    <Compile Include="AudioMonitor.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="BeepCl.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ControlForm.cs">
-      <SubType>Form</SubType>
+    <Compile Include="InstrumentString.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ControlForm.Designer.cs">
-      <DependentUpon>ControlForm.cs</DependentUpon>
+    <Compile Include="Note.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="InstrumentString.cs" />
-    <Compile Include="Note.cs" />
     <Compile Include="Oscilloscope.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Oscilloscope.Designer.cs">
       <DependentUpon>Oscilloscope.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="ControlForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>ControlForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Oscilloscope.resx">
-      <SubType>Designer</SubType>
       <DependentUpon>Oscilloscope.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -74,8 +71,8 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="StringedInstrument.resx">
-      <SubType>Designer</SubType>
       <DependentUpon>StringedInstrument.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
