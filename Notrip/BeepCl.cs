@@ -24,6 +24,9 @@ namespace LothianProductions.Notrip {
 		
 		protected Control mControl;	
 		protected bool mPlaying;
+		public bool Playing {
+			get{ return mPlaying; }
+		}
 
 		private struct Osc {
 		    public double dphi; // frequency
@@ -140,6 +143,7 @@ namespace LothianProductions.Notrip {
 		}
 
 		public void Stop() {
+		mPlaying = false;
 			buffa.Stop();
 
 			FillZero = true;//output zeros

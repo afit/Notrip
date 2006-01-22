@@ -8,14 +8,9 @@ namespace LothianProductions.Notrip {
 	[Serializable()]
 	public class InstrumentString {
 
-		public InstrumentString() {
-			mNote = Note.E;
-			mStep = 7;
-		}
-
-		public InstrumentString( Note note, int steps ) {
+		public InstrumentString( Note note, int octave ) {
 			mNote = note;
-			mStep = steps;
+			mOctave = octave;
 		}
 	
 		protected Note mNote = Note.E;
@@ -24,11 +19,10 @@ namespace LothianProductions.Notrip {
 			set{ mNote = value; }
 		}
 		
-		protected int mStep = -17;
-		public int RootSteps {
-			get{ return mStep; }
-			set{ mStep = value; }
-		}
-		
+		protected int mOctave = 4;
+		public int Octave {
+			get{ return mOctave; }
+			set{ mOctave = value; }
+		}	
 	}
 }

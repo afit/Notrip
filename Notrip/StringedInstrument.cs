@@ -14,35 +14,30 @@ namespace LothianProductions.Notrip {
 		
 		public StringedInstrument() {
 			mStrings = new InstrumentString[] {
-				new InstrumentString( Note.E, -17 ),
-				new InstrumentString( Note.A, -12 ),
-				new InstrumentString( Note.D, -7 ),
-				new InstrumentString( Note.G, -2 ),
-				new InstrumentString( Note.B, 2 ),
-				new InstrumentString( Note.E, 7 )
+				new InstrumentString( Note.E, 2 ),
+				new InstrumentString( Note.A, 3 ),
+				new InstrumentString( Note.D, 3 ),
+				new InstrumentString( Note.G, 3 ),
+				new InstrumentString( Note.B, 4 ),
+				new InstrumentString( Note.E, 4 )
 			};
 			mFrets = 24;
 			mCapo = 0;
 			mHorizontal = true;
-			
-			mNoteLabels = new String[mStrings.Length, mFrets];
-			
+			mShowFrequencies = false;
 			InitializeComponent();
 		}
 
-		const int ROOT_FREQ = 440;
+		const int ROOT_A4_FREQ = 440;
 		protected int mLastFret;
 		protected int mLastInstrumentString;
-		protected String[,] mNoteLabels;
-		protected Dictionary<String, BeepCl> mBeeps = new Dictionary<string,BeepCl>();
-
-		//protected InstrumentString[] mStrings;
+		protected Dictionary<double, BeepCl> mBeeps = new Dictionary<double, BeepCl>();
 		protected InstrumentString[] mStrings;
 		public InstrumentString[] Strings {
 			get{ return mStrings; }
 			set{
-				mStrings = value;
-				Invalidate();
+			    mStrings = value;
+			    Invalidate();
 			}
 		}
 		
@@ -55,6 +50,16 @@ namespace LothianProductions.Notrip {
 			}
 		}
 
+		protected bool mShowFrequencies;
+		public bool ShowFrequencies {
+			get{ return mShowFrequencies; }
+			set{
+				mShowFrequencies = value;
+				Invalidate();
+			}
+		}
+
+		// FIXME deprecate this?
 		protected int mCapo;
 		public int Capo {
 			get{ return mCapo; }
@@ -82,23 +87,21 @@ namespace LothianProductions.Notrip {
             }
         }
 
-		protected void PlayNote( int fret, int instrumentString, int duration ) {
+		protected void PlayNote( double frequency, int duration ) {
 			// Create a new beep object and fire it off on a separate thread.
-			if( mLeftHanded )
-				fret = (Frets - fret) + 1;
-			
 			lock( mBeeps ) {
 				BeepCl beep;
-				if( mBeeps.ContainsKey( fret + ":" + instrumentString ) )
-					beep = mBeeps[ fret + ":" + instrumentString ];
+				if( mBeeps.ContainsKey( frequency ) )
+					beep = mBeeps[ frequency ];
 				else {
-					double steps = Strings[instrumentString - 1].RootSteps + fret - 1;		
 					beep = new BeepCl( this );
-					mBeeps.Add( fret + ":" + instrumentString, beep );
-					beep.Frequency = ROOT_FREQ * Math.Pow(2, steps / 12);
+					mBeeps.Add( frequency, beep );
+					beep.Frequency = frequency;
 				}
 				
-				//if( beep.
+				//if( beep.Playing )
+				//    beep.Stop();//.else.Duration = 0;
+				
 				//beep.StartOrStopPlay( false );
 				beep.Duration = duration;
 				new Thread( new ThreadStart( beep.Beep ) ).Start();
@@ -122,7 +125,24 @@ namespace LothianProductions.Notrip {
 			int fretX = spacingFrets * fret;
 			
 			g.FillEllipse( brush, fretX - 10, stringY - 10, 20, 20 );
-			g.DrawString( mNoteLabels[instrumentString - 1, fret - 1], Font, Brushes.Black, fretX - (g.MeasureString( mNoteLabels[instrumentString - 1, fret - 1], Font ).ToSize().Width / 2), stringY - (g.MeasureString( mNoteLabels[instrumentString - 1, fret - 1], Font ).ToSize().Height / 2) );
+
+			if( mLeftHanded )
+				fret = mFrets + 1 - fret;
+			
+			String label;
+			if( ! mShowFrequencies ) {
+
+				int noteIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote ) + fret - 1;
+				while( noteIndex > 11 )
+					noteIndex -= 12;
+				label = NoteHelper.Instance().GetOrderedNoteNames()[ noteIndex ];
+			} else {
+				// Convert to int to display more cleanly:
+				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
+				label = (int) (ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d)) + "";
+			}
+			
+			g.DrawString( label, Font, Brushes.Black, fretX - (g.MeasureString( label, Font ).ToSize().Width / 2), stringY - (g.MeasureString( label, Font ).ToSize().Height / 2) );
 		}
 
 		private void StringedInstrument_Paint( object sender, PaintEventArgs e ) {
@@ -158,7 +178,6 @@ namespace LothianProductions.Notrip {
 			}
 
 			// Draw fingerings on each string for each fret.
-			int note;
 			int[] stringHanding, fretHanding;
 			
 			if( ! mLeftHanded )
@@ -173,15 +192,7 @@ namespace LothianProductions.Notrip {
 
 				
 			for( int i = stringHanding[0]; i != stringHanding[1]; i = i + stringHanding[2] ) {
-				note = (int) Strings[i].RootNote;
-				
-				for( int ii = fretHanding[0]; ii != fretHanding[1]; ii = ii + fretHanding[2] ) {	
-					mNoteLabels[i, ii] = Enum.GetName( typeof(Note), note++ ).Replace( "sharp", "#" ).Replace( "flat", "b" );
-
-					// Loop notes back to start.
-					if( note == Enum.GetValues( typeof(Note) ).Length )
-						note = 0;
-					
+				for( int ii = fretHanding[0]; ii != fretHanding[1]; ii = ii + fretHanding[2] ) {		
 					DrawFingering( Graphics.FromHwnd( Handle ), i + 1, ii + 1, Brushes.White );
 
 					if( i == stringHanding[0] ) {
@@ -206,11 +217,17 @@ namespace LothianProductions.Notrip {
 			int fret, instrumentString;
 			FindFingering( e.X, e.Y, out fret, out instrumentString );
 			
+			if( mLeftHanded )
+				fret = (Frets - fret) + 1;
+			
+			int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
+			double frequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
+			
 			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length )
-				if( e.Button == MouseButtons.Left )
-					PlayNote( fret, instrumentString, 500 );
-				else if( e.Button == MouseButtons.Right )
-					PlayNote( fret, instrumentString, 0 );
+			    if( e.Button == MouseButtons.Left )
+			        PlayNote( frequency, 500 );
+			    else if( e.Button == MouseButtons.Right )
+			        PlayNote( frequency, 0 );
 		}
 
 		private void StringedInstrument_MouseMove(object sender, MouseEventArgs e) {

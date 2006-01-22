@@ -51,20 +51,31 @@ namespace LothianProductions.Notrip {
 
 				double firstSummation = 0;
 				double secondSummation = 0;
+				//double twoPInjk = ((2 * Math.PI) / n) * (j * k);
+				// FIXME why is this equation shown twice in graph?
+				double twoPInjk = ((4d*Math.PI) / samples.Length ) * j;
+				// FIXME why does this look right?
+				//double twoPInjk = Math.PI * j / samples.Length;
 
 				for (int k = 0; k < n; k++) {
-					double twoPInjk = ((2 * Math.PI) / n) * (j * k);
-					firstSummation +=  samples[k] * Math.Cos(twoPInjk);
-					secondSummation += samples[k] * Math.Sin(twoPInjk);
+					//double twoPInjk = Math.PI * j * k / samples.Length;
+					firstSummation +=  samples[k] * Math.Cos(twoPInjk*k);
+					secondSummation += samples[k] * Math.Sin(twoPInjk*k);
 				}
 
 				//f[j] = Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) );
 
 				//double amplitude = 2 * f[j]/n;
 				mSpectrumPoints[j].X = j;
-				mSpectrumPoints[j].Y = Height - 1- (int) (((float)Height/256f) * (2f * ( Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) )/n));
+				
+				// FIXME: why does 0 seem to get drawn at top? what is real Y scale?
+				//mSpectrumPoints[j].Y = Height - 1
+				//			- (int) (((float)Height/256f) * 
+				mSpectrumPoints[j].Y =	(int)		(2d * ( Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) )/(double)n);
+				if( j > 0 ) {
 				max = Math.Max( max, mSpectrumPoints[j].Y );
 				min = Math.Min( min, mSpectrumPoints[j].Y );
+				}
 				//double frequency = j/T;
 			//	Console.WriteLine("frequency = "+frequency+", amp = "+amplitude);
 			//Console.WriteLine(  mSpectrumPoints[j].X );
@@ -75,6 +86,9 @@ namespace LothianProductions.Notrip {
 		    mBufferGraphics.DrawLine( mAxisPen,  0, Height / 2, Width, Height / 2 );
 			mBufferGraphics.DrawLines( mWaveformPen, mWaveformPoints );
 		    mBufferGraphics.DrawLines( mSpectrumPen, mSpectrumPoints );
+		    mBufferGraphics.DrawLine( mAxisPen, n, 0, n, Height );
+		    mBufferGraphics.DrawString( "1px = " + 1d/T + "hz", Font, Brushes.Blue, 10, 10 );
+			//mBufferGraphics.DrawString( "1px = " + 1/AudioMonitor.SAMPLE_RATE*(samples.Length/Width) + "ms", Font, Brushes.Black, 10, 30 );
 			Graphics.FromHwnd( Handle ).DrawImageUnscaled( mBuffer, 0, 0 );
 		}
 

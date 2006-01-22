@@ -10,6 +10,7 @@ namespace LothianProductions.Notrip {
 
 	public class AudioMonitor {
 
+		public const int SAMPLE_RATE = 8000;
 		protected static readonly AudioMonitor mInstance = new AudioMonitor();
 		protected const int NO_RECORD_NOTIFICATIONS = 16;
 		protected const int BITS_PER_BYTE = 8;
@@ -39,7 +40,7 @@ namespace LothianProductions.Notrip {
 			// buffer to start recording   
 			WaveFormat format = new WaveFormat();
 			format.FormatTag = WaveFormatTag.Pcm;
-			format.SamplesPerSecond = 22000;//8000;
+			format.SamplesPerSecond = SAMPLE_RATE;
 			format.BitsPerSample = 8;
 			format.Channels = 1;
 			format.BlockAlign = (short) (format.Channels * (format.BitsPerSample / BITS_PER_BYTE));
@@ -121,10 +122,8 @@ namespace LothianProductions.Notrip {
 				
 				// Move the capture offset along
 				nextCaptureOffset += captureData.Length; 
-				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer			
-				
-				//Console.WriteLine( captureData.Length );
-				
+				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer
+
 				AudioDataUpdate( captureData );
 			} while( mRunning );
 		}
