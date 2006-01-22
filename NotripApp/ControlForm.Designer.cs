@@ -29,26 +29,28 @@ namespace LothianProductions.Notrip {
 			this.CheckLefthanded = new System.Windows.Forms.CheckBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.radioButton7 = new System.Windows.Forms.RadioButton();
+			this.radioButton6 = new System.Windows.Forms.RadioButton();
 			this.radioButton5 = new System.Windows.Forms.RadioButton();
 			this.radioButton3 = new System.Windows.Forms.RadioButton();
 			this.radioButton1 = new System.Windows.Forms.RadioButton();
 			this.NumericStrings = new System.Windows.Forms.NumericUpDown();
 			this.mOscilloscope = new LothianProductions.Notrip.Oscilloscope();
-			this.InstrumentMain = new LothianProductions.Notrip.StringedInstrument();
 			this.comboBox2 = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.InstrumentMain = new LothianProductions.Notrip.StringedInstrument();
+			this.CheckShowFrequencies = new System.Windows.Forms.CheckBox();
 			this.NumericFrets = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.comboBox3 = new System.Windows.Forms.ComboBox();
-			this.radioButton6 = new System.Windows.Forms.RadioButton();
-			this.radioButton7 = new System.Windows.Forms.RadioButton();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.radioButton4 = new System.Windows.Forms.RadioButton();
+			this.groupBox5 = new System.Windows.Forms.GroupBox();
+			this.ProgressAmplitude = new System.Windows.Forms.ProgressBar();
 			this.groupBox1.SuspendLayout();
 			( (System.ComponentModel.ISupportInitialize) ( this.NumericStrings ) ).BeginInit();
 			this.groupBox3.SuspendLayout();
@@ -60,6 +62,7 @@ namespace LothianProductions.Notrip {
 			// 
 			// comboBox1
 			// 
+			this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBox1.FormattingEnabled = true;
 			this.comboBox1.Items.AddRange( new object[] {
             "A",
@@ -76,13 +79,13 @@ namespace LothianProductions.Notrip {
             "G#"} );
 			this.comboBox1.Location = new System.Drawing.Point( 55, 20 );
 			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size( 134, 21 );
+			this.comboBox1.Size = new System.Drawing.Size( 36, 21 );
 			this.comboBox1.TabIndex = 5;
 			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point( 380, 350 );
+			this.label1.Location = new System.Drawing.Point( 301, 46 );
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size( 115, 13 );
 			this.label1.TabIndex = 12;
@@ -114,12 +117,34 @@ namespace LothianProductions.Notrip {
 			this.groupBox1.Controls.Add( this.radioButton6 );
 			this.groupBox1.Controls.Add( this.comboBox1 );
 			this.groupBox1.Controls.Add( this.label2 );
-			this.groupBox1.Location = new System.Drawing.Point( 12, 241 );
+			this.groupBox1.Location = new System.Drawing.Point( 465, 182 );
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size( 196, 175 );
+			this.groupBox1.Size = new System.Drawing.Size( 105, 96 );
 			this.groupBox1.TabIndex = 18;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Highlighting";
+			// 
+			// radioButton7
+			// 
+			this.radioButton7.AutoSize = true;
+			this.radioButton7.Location = new System.Drawing.Point( 10, 70 );
+			this.radioButton7.Name = "radioButton7";
+			this.radioButton7.Size = new System.Drawing.Size( 83, 17 );
+			this.radioButton7.TabIndex = 21;
+			this.radioButton7.TabStop = true;
+			this.radioButton7.Text = "Draw scales";
+			this.radioButton7.UseVisualStyleBackColor = true;
+			// 
+			// radioButton6
+			// 
+			this.radioButton6.AutoSize = true;
+			this.radioButton6.Location = new System.Drawing.Point( 10, 47 );
+			this.radioButton6.Name = "radioButton6";
+			this.radioButton6.Size = new System.Drawing.Size( 85, 17 );
+			this.radioButton6.TabIndex = 20;
+			this.radioButton6.TabStop = true;
+			this.radioButton6.Text = "Draw chords";
+			this.radioButton6.UseVisualStyleBackColor = true;
 			// 
 			// radioButton5
 			// 
@@ -172,30 +197,13 @@ namespace LothianProductions.Notrip {
 			this.mOscilloscope.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.mOscilloscope.Location = new System.Drawing.Point( 1, 19 );
 			this.mOscilloscope.Name = "mOscilloscope";
-			this.mOscilloscope.Size = new System.Drawing.Size( 256, 198 );
+			this.mOscilloscope.Size = new System.Drawing.Size( 565, 139 );
 			this.mOscilloscope.TabIndex = 4;
 			this.mOscilloscope.Click += new System.EventHandler( this.mOscilloscope_Click );
 			// 
-			// InstrumentMain
-			// 
-			this.InstrumentMain.Capo = 0;
-			this.InstrumentMain.Frets = 12;
-			this.InstrumentMain.Horizontal = true;
-			this.InstrumentMain.LeftHanded = false;
-			this.InstrumentMain.Location = new System.Drawing.Point( 6, 65 );
-			this.InstrumentMain.Name = "InstrumentMain";
-			this.InstrumentMain.Size = new System.Drawing.Size( 340, 143 );
-			this.InstrumentMain.Strings = new LothianProductions.Notrip.InstrumentString[] {
-        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings"))),
-        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings1"))),
-        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings2"))),
-        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings3"))),
-        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings4"))),
-        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings5")))};
-			this.InstrumentMain.TabIndex = 21;
-			// 
 			// comboBox2
 			// 
+			this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBox2.FormattingEnabled = true;
 			this.comboBox2.Items.AddRange( new object[] {
             "Stringed instrument",
@@ -216,24 +224,61 @@ namespace LothianProductions.Notrip {
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add( this.InstrumentMain );
+			this.groupBox3.Controls.Add( this.CheckShowFrequencies );
 			this.groupBox3.Controls.Add( this.NumericFrets );
 			this.groupBox3.Controls.Add( this.label5 );
 			this.groupBox3.Controls.Add( this.label4 );
-			this.groupBox3.Controls.Add( this.InstrumentMain );
 			this.groupBox3.Controls.Add( this.CheckLefthanded );
 			this.groupBox3.Controls.Add( this.label3 );
+			this.groupBox3.Controls.Add( this.label1 );
 			this.groupBox3.Controls.Add( this.NumericStrings );
 			this.groupBox3.Controls.Add( this.comboBox2 );
-			this.groupBox3.Location = new System.Drawing.Point( 12, 12 );
+			this.groupBox3.Location = new System.Drawing.Point( 12, 182 );
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size( 364, 223 );
+			this.groupBox3.Size = new System.Drawing.Size( 435, 223 );
 			this.groupBox3.TabIndex = 24;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Instrument";
 			// 
+			// InstrumentMain
+			// 
+			this.InstrumentMain.Capo = 0;
+			this.InstrumentMain.Frets = 12;
+			this.InstrumentMain.Horizontal = true;
+			this.InstrumentMain.LeftHanded = false;
+			this.InstrumentMain.Location = new System.Drawing.Point( 6, 65 );
+			this.InstrumentMain.Name = "InstrumentMain";
+			this.InstrumentMain.ShowFrequencies = false;
+			this.InstrumentMain.Size = new System.Drawing.Size( 340, 143 );
+			this.InstrumentMain.Strings = new LothianProductions.Notrip.InstrumentString[] {
+        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings"))),
+        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings1"))),
+        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings2"))),
+        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings3"))),
+        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings4"))),
+        ((LothianProductions.Notrip.InstrumentString)(resources.GetObject("InstrumentMain.Strings5")))};
+			this.InstrumentMain.TabIndex = 29;
+			// 
+			// CheckShowFrequencies
+			// 
+			this.CheckShowFrequencies.AutoSize = true;
+			this.CheckShowFrequencies.Location = new System.Drawing.Point( 212, 19 );
+			this.CheckShowFrequencies.Name = "CheckShowFrequencies";
+			this.CheckShowFrequencies.Size = new System.Drawing.Size( 111, 17 );
+			this.CheckShowFrequencies.TabIndex = 28;
+			this.CheckShowFrequencies.Text = "Show frequencies";
+			this.CheckShowFrequencies.UseVisualStyleBackColor = true;
+			this.CheckShowFrequencies.CheckedChanged += new System.EventHandler( this.CheckShowFrequencies_CheckedChanged );
+			// 
 			// NumericFrets
 			// 
 			this.NumericFrets.Location = new System.Drawing.Point( 146, 44 );
+			this.NumericFrets.Minimum = new decimal( new int[] {
+            1,
+            0,
+            0,
+            0} );
 			this.NumericFrets.Name = "NumericFrets";
 			this.NumericFrets.Size = new System.Drawing.Size( 50, 20 );
 			this.NumericFrets.TabIndex = 27;
@@ -265,9 +310,9 @@ namespace LothianProductions.Notrip {
 			// groupBox4
 			// 
 			this.groupBox4.Controls.Add( this.mOscilloscope );
-			this.groupBox4.Location = new System.Drawing.Point( 382, 12 );
+			this.groupBox4.Location = new System.Drawing.Point( 12, 12 );
 			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size( 258, 223 );
+			this.groupBox4.Size = new System.Drawing.Size( 567, 164 );
 			this.groupBox4.TabIndex = 25;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Monitor analysis";
@@ -283,6 +328,7 @@ namespace LothianProductions.Notrip {
 			// 
 			// comboBox3
 			// 
+			this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBox3.FormattingEnabled = true;
 			this.comboBox3.Items.AddRange( new object[] {
             "Major",
@@ -293,51 +339,18 @@ namespace LothianProductions.Notrip {
 			this.comboBox3.Size = new System.Drawing.Size( 133, 21 );
 			this.comboBox3.TabIndex = 19;
 			// 
-			// radioButton6
-			// 
-			this.radioButton6.AutoSize = true;
-			this.radioButton6.Location = new System.Drawing.Point( 10, 47 );
-			this.radioButton6.Name = "radioButton6";
-			this.radioButton6.Size = new System.Drawing.Size( 85, 17 );
-			this.radioButton6.TabIndex = 20;
-			this.radioButton6.TabStop = true;
-			this.radioButton6.Text = "Draw chords";
-			this.radioButton6.UseVisualStyleBackColor = true;
-			// 
-			// radioButton7
-			// 
-			this.radioButton7.AutoSize = true;
-			this.radioButton7.Location = new System.Drawing.Point( 10, 70 );
-			this.radioButton7.Name = "radioButton7";
-			this.radioButton7.Size = new System.Drawing.Size( 83, 17 );
-			this.radioButton7.TabIndex = 21;
-			this.radioButton7.TabStop = true;
-			this.radioButton7.Text = "Draw scales";
-			this.radioButton7.UseVisualStyleBackColor = true;
-			// 
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add( this.radioButton4 );
 			this.groupBox2.Controls.Add( this.radioButton1 );
 			this.groupBox2.Controls.Add( this.radioButton5 );
 			this.groupBox2.Controls.Add( this.radioButton3 );
-			this.groupBox2.Location = new System.Drawing.Point( 214, 302 );
+			this.groupBox2.Location = new System.Drawing.Point( 453, 284 );
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size( 100, 114 );
+			this.groupBox2.Size = new System.Drawing.Size( 100, 121 );
 			this.groupBox2.TabIndex = 26;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Scales";
-			// 
-			// groupBox5
-			// 
-			this.groupBox5.Controls.Add( this.label6 );
-			this.groupBox5.Controls.Add( this.comboBox3 );
-			this.groupBox5.Location = new System.Drawing.Point( 214, 241 );
-			this.groupBox5.Name = "groupBox5";
-			this.groupBox5.Size = new System.Drawing.Size( 194, 55 );
-			this.groupBox5.TabIndex = 27;
-			this.groupBox5.TabStop = false;
-			this.groupBox5.Text = "Chords";
 			// 
 			// radioButton4
 			// 
@@ -350,15 +363,37 @@ namespace LothianProductions.Notrip {
 			this.radioButton4.Text = "5th";
 			this.radioButton4.UseVisualStyleBackColor = true;
 			// 
+			// groupBox5
+			// 
+			this.groupBox5.Controls.Add( this.label6 );
+			this.groupBox5.Controls.Add( this.comboBox3 );
+			this.groupBox5.Location = new System.Drawing.Point( 11, 411 );
+			this.groupBox5.Name = "groupBox5";
+			this.groupBox5.Size = new System.Drawing.Size( 194, 55 );
+			this.groupBox5.TabIndex = 27;
+			this.groupBox5.TabStop = false;
+			this.groupBox5.Text = "Chords";
+			// 
+			// ProgressAmplitude
+			// 
+			this.ProgressAmplitude.Location = new System.Drawing.Point( 241, 440 );
+			this.ProgressAmplitude.Maximum = 255;
+			this.ProgressAmplitude.Minimum = 128;
+			this.ProgressAmplitude.Name = "ProgressAmplitude";
+			this.ProgressAmplitude.Size = new System.Drawing.Size( 285, 12 );
+			this.ProgressAmplitude.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+			this.ProgressAmplitude.TabIndex = 28;
+			this.ProgressAmplitude.Value = 128;
+			// 
 			// ControlForm
 			// 
-			this.ClientSize = new System.Drawing.Size( 655, 428 );
+			this.ClientSize = new System.Drawing.Size( 591, 476 );
+			this.Controls.Add( this.ProgressAmplitude );
 			this.Controls.Add( this.groupBox5 );
 			this.Controls.Add( this.groupBox2 );
 			this.Controls.Add( this.groupBox4 );
 			this.Controls.Add( this.groupBox3 );
 			this.Controls.Add( this.groupBox1 );
-			this.Controls.Add( this.label1 );
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.MaximizeBox = false;
 			this.Name = "ControlForm";
@@ -377,7 +412,6 @@ namespace LothianProductions.Notrip {
 			this.groupBox5.ResumeLayout( false );
 			this.groupBox5.PerformLayout();
 			this.ResumeLayout( false );
-			this.PerformLayout();
 
 		}
 
@@ -393,7 +427,6 @@ namespace LothianProductions.Notrip {
 		private System.Windows.Forms.RadioButton radioButton3;
 		private System.Windows.Forms.RadioButton radioButton1;
 		private System.Windows.Forms.NumericUpDown NumericStrings;
-		private StringedInstrument InstrumentMain;
 		private System.Windows.Forms.ComboBox comboBox2;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.GroupBox groupBox3;
@@ -408,6 +441,9 @@ namespace LothianProductions.Notrip {
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.RadioButton radioButton4;
 		private System.Windows.Forms.GroupBox groupBox5;
+		private System.Windows.Forms.ProgressBar ProgressAmplitude;
+		private System.Windows.Forms.CheckBox CheckShowFrequencies;
+		private StringedInstrument InstrumentMain;
 
 	}
 }
