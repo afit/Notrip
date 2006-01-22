@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Data;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -29,6 +30,9 @@ namespace LothianProductions.Notrip {
 		}
 
 		const int ROOT_A4_FREQ = 440;
+		protected Pen mPen = new Pen( Color.Black, 1f );
+		protected Bitmap mBuffer;
+		protected Graphics mBufferGraphics;
 		protected int mLastFret;
 		protected int mLastInstrumentString;
 		protected Dictionary<double, Beep> mBeeps = new Dictionary<double, Beep>();
@@ -87,6 +91,68 @@ namespace LothianProductions.Notrip {
             }
         }
 
+		public void Highlight( Dictionary<double, int> frequencies ) {
+			//Invalidate();
+//			foreach( double frequency in frequencies.Keys ) {
+//				int fret, instrumentString;
+				
+				//FindFingering( (int) frequency, out fret, out instrumentString );
+				
+				//DrawFingering( Graphics.FromHwnd( Handle ), instrumentString, fret, Brushes.Red );
+//			}
+
+			for( int instrumentString = 0; instrumentString < mStrings.Length; instrumentString++ ) {
+				for( int fret = 0; fret < mFrets; fret++ ) {		
+							
+					int step = -36 + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].RootNote );
+					double fingeredFrequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret) / 12d);
+					
+					DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.White );
+					
+					foreach( double frequency in frequencies.Keys ) {
+						if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
+							DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.Red );
+							break;
+						}
+					}
+				
+					//DrawFingering( g, i + 1, ii + 1, Brushes.White );
+
+					//if( i == stringHanding[0] ) {
+					//    int stringY = spacingStrings * (Strings.Length + 1);
+					//    int fretX = spacingFrets * (ii + 1);
+					//    String fretNo = Math.Abs( ii + 1 - (mLeftHanded ? mFrets + 1 : 0) ) + "";
+					//    g.DrawString(
+					//        fretNo, Font, Brushes.Black,
+					//        fretX - (g.MeasureString( fretNo, Font ).ToSize().Width / 2),
+					//        stringY - (g.MeasureString( fretNo, Font ).ToSize().Height / 1.5f)
+					//    );
+					//}
+				}
+			}
+		}
+		
+		//protected void FindFingering( int frequency, out int fret, out int instrumentString ) {
+		//    fret = 0; instrumentString = 0;
+			
+		//    int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
+		//    double frequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
+			
+		//    fopr
+			
+		//}
+	
+		protected void FindFingering( int x, int y, out int fret, out int instrumentString ) {
+			if( Strings.Length == 0 || Frets == 0 ) {
+				fret = 0;
+				instrumentString = 0;
+			} else {
+				fret = (int) Math.Round( (float) x / (float) (Width / (Frets + 1)), 0 );
+				instrumentString = (int) Math.Round( (float) y / (float) (Height / (Strings.Length + 1)), 0 );
+			}
+		}
+
+		// FIXME move this to AudioMonitor?
 		protected void PlayNote( double frequency, int duration ) {
 			// Create a new beep object and fire it off on a separate thread.
 			lock( mBeeps ) {
@@ -108,16 +174,6 @@ namespace LothianProductions.Notrip {
 				
 				beep.Duration = duration;
 				new Thread( new ThreadStart( beep.Start ) ).Start();
-			}
-		}
-		
-		protected void FindFingering( int x, int y, out int fret, out int instrumentString ) {
-			if( Strings.Length == 0 || Frets == 0 ) {
-				fret = 0;
-				instrumentString = 0;
-			} else {
-				fret = (int) Math.Round( (float) x / (float) (Width / (Frets + 1)), 0 );
-				instrumentString = (int) Math.Round( (float) y / (float) (Height / (Strings.Length + 1)), 0 );
 			}
 		}
 
@@ -149,8 +205,9 @@ namespace LothianProductions.Notrip {
 		}
 
 		private void StringedInstrument_Paint( object sender, PaintEventArgs e ) {
-			Graphics g = e.Graphics;
-			Pen pen = new Pen( Color.Black, 1f );
+			mBufferGraphics.Clear( BackColor );
+		
+			Graphics g = mBufferGraphics;
 			
 			// Add one to the number to find the spacing, so
 			// that there's an equal space at the top and bottom.
@@ -161,10 +218,10 @@ namespace LothianProductions.Notrip {
 					new Point( spacingFrets * (i + 1), spacingStrings ),
 					new Point( spacingFrets * (i + 1), Height - spacingStrings )
 				};
-				g.DrawLines( pen, points );
+				g.DrawLines( mPen, points );
 			}
 
-			pen.Width = 2f;					
+			mPen.Width = 2f;					
 			
 			int startString = 0, endString = Width;
 			if( mLeftHanded )
@@ -177,7 +234,7 @@ namespace LothianProductions.Notrip {
 					new Point( startString, spacingStrings * (i + 1) ),
 					new Point( endString, spacingStrings * (i + 1) )
 				};
-				g.DrawLines( pen, points );
+				g.DrawLines( mPen, points );
 			}
 
 			// Draw fingerings on each string for each fret.
@@ -196,7 +253,7 @@ namespace LothianProductions.Notrip {
 				
 			for( int i = stringHanding[0]; i != stringHanding[1]; i = i + stringHanding[2] ) {
 				for( int ii = fretHanding[0]; ii != fretHanding[1]; ii = ii + fretHanding[2] ) {		
-					DrawFingering( Graphics.FromHwnd( Handle ), i + 1, ii + 1, Brushes.White );
+					DrawFingering( g, i + 1, ii + 1, Brushes.White );
 
 					if( i == stringHanding[0] ) {
 						int stringY = spacingStrings * (Strings.Length + 1);
@@ -210,10 +267,13 @@ namespace LothianProductions.Notrip {
 					}
 				}
 			}
+			
+			Graphics.FromHwnd( Handle ).DrawImageUnscaled( mBuffer, 0, 0 );
 		}
 		
 		private void StringedInstrument_Resize( object sender, EventArgs e ) {
-			this.Invalidate();
+			mBuffer = new Bitmap( Width, Height, PixelFormat.Format32bppPArgb );
+			mBufferGraphics = Graphics.FromImage( mBuffer );
 		}
 
 		private void StringedInstrument_MouseUp(object sender, MouseEventArgs e) {

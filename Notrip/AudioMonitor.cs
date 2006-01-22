@@ -7,6 +7,7 @@ using Microsoft.DirectX.DirectSound;
 
 namespace LothianProductions.Notrip {
 	public delegate void AudioDataHandler( byte[] samples );
+	public delegate void SpectralAnalysisHandler( Dictionary<double, int> frequencies );
 
 	public class AudioMonitor {
 
@@ -23,6 +24,7 @@ namespace LothianProductions.Notrip {
 		protected AudioMonitor() {}	
 		
 		public event AudioDataHandler AudioDataUpdate;
+		public event SpectralAnalysisHandler SpectralAnalysisUpdate;
 		
 		public AutoResetEvent notificationEvent	= null;
 		public int notifySize = 0;
@@ -90,9 +92,6 @@ namespace LothianProductions.Notrip {
 			
 			// Trigger event again...
 			notificationEvent.Set();
-			
-			// Read any data missed earlier
-			//Process();
 		}
 
 		protected void Process() {
@@ -100,6 +99,7 @@ namespace LothianProductions.Notrip {
 			int readPos = 0;
 			int capturePos = 0;
 			int lockSize;
+			Dictionary<double, int> frequencies = new Dictionary<double, int>();
 			
 			do {
 				// Wait for a notification:
@@ -124,7 +124,29 @@ namespace LothianProductions.Notrip {
 				nextCaptureOffset += captureData.Length; 
 				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer
 
+				// Spectral analysis:
+				float T = (float) captureData.Length / (float) AudioMonitor.SAMPLE_RATE;
+				//int n = captureData.Length / 2;
+				frequencies.Clear();
+
+				for( int j = 0; j < captureData.Length / 4; j++ ) {
+					double firstSummation = 0, secondSummation = 0;
+					double twoPInjk = Math.PI / (float) captureData.Length * j * 4d;
+
+					for(int k = 0; k < captureData.Length / 2; k++ ) {
+						double byK = twoPInjk * k;
+						firstSummation +=  captureData[k] * Math.Cos(byK);
+						secondSummation += captureData[k] * Math.Sin(byK);
+					}
+					
+					double amp = 4d * Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) / (double) captureData.Length;
+
+					if( j > 0 && amp > 5 )
+						frequencies.Add( j / T *2d, (int) amp );
+				} 
+
 				AudioDataUpdate( captureData );
+				SpectralAnalysisUpdate( frequencies );
 			} while( mRunning );
 		}
 	}
