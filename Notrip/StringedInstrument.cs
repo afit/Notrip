@@ -107,7 +107,7 @@ namespace LothianProductions.Notrip {
 					int step = -36 + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].RootNote );
 					double fingeredFrequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret) / 12d);
 					
-					DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.White );
+					//DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.White );
 					
 					foreach( double frequency in frequencies.Keys ) {
 						if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
