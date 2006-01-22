@@ -10,7 +10,7 @@ namespace LothianProductions.Notrip {
 
 	public class AudioMonitor {
 
-		public const int SAMPLE_RATE = 8000;
+		public const int SAMPLE_RATE = 16000;
 		protected static readonly AudioMonitor mInstance = new AudioMonitor();
 		protected const int NO_RECORD_NOTIFICATIONS = 16;
 		protected const int BITS_PER_BYTE = 8;

@@ -41,17 +41,18 @@ namespace LothianProductions.Notrip {
 			// Spectral analysis:
 			float T = (float) samples.Length / (float) AudioMonitor.SAMPLE_RATE;
 			int n = samples.Length / 2;
-			mSpectrumPoints = new Point[ n ];
-			int max = 0, min = 0;
+			mSpectrumPoints = new Point[ n/2 ];
+			double max = 0d, min = 1000d;
 
 			//do the DFT for each value of x sub j and store as f sub j
 			//double[] f = new double[n];
 			//Point[] points = new Point[n];
-			for (int j = 0; j < n; j++) {
+			for (int j = 0; j < n/2; j++) {
 
 				double firstSummation = 0;
 				double secondSummation = 0;
 				//double twoPInjk = ((2 * Math.PI) / n) * (j * k);
+				//double twoPInjk = ((2d * Math.PI) / (double)n) * (double)j;
 				// FIXME why is this equation shown twice in graph?
 				double twoPInjk = ((4d*Math.PI) / samples.Length ) * j;
 				// FIXME why does this look right?
@@ -71,20 +72,26 @@ namespace LothianProductions.Notrip {
 				// FIXME: why does 0 seem to get drawn at top? what is real Y scale?
 				//mSpectrumPoints[j].Y = Height - 1
 				//			- (int) (((float)Height/256f) * 
-				mSpectrumPoints[j].Y =	(int)		(2d * ( Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) )/(double)n);
-				if( j > 0 ) {
-				max = Math.Max( max, mSpectrumPoints[j].Y );
-				min = Math.Min( min, mSpectrumPoints[j].Y );
-				}
+				// no need to double or /n
+				//mSpectrumPoints[j].Y =	(int)		(2d * ( Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) )/(double)n);
+				double amp = (4d * Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) / (double) samples.Length);
+				mSpectrumPoints[j].Y = Height - 1 - (int) ((Height/256f) * amp);
+				//if( j > 0 ) {
+				//max = Math.Max( max, mSpectrumPoints[j].Y );
+				//min = Math.Min( min, mSpectrumPoints[j].Y );
+				//}
 				//double frequency = j/T;
 			//	Console.WriteLine("frequency = "+frequency+", amp = "+amplitude);
+			if(  j>0 && amp > 10 ) {
+			    Console.WriteLine("frequency = "+j/T*2d+", amp = "+(int)amp);
+			}
 			//Console.WriteLine(  mSpectrumPoints[j].X );
 			} 
 
-			Console.WriteLine( max + ":" + min + ":" + n + ": up to " + n/T + " hz");
+			//Console.WriteLine( max + ":" + min + ":" + n + ": up to " + n/T + " hz");
 		    mBufferGraphics.Clear( BackColor );
 		    mBufferGraphics.DrawLine( mAxisPen,  0, Height / 2, Width, Height / 2 );
-			mBufferGraphics.DrawLines( mWaveformPen, mWaveformPoints );
+			//mBufferGraphics.DrawLines( mWaveformPen, mWaveformPoints );
 		    mBufferGraphics.DrawLines( mSpectrumPen, mSpectrumPoints );
 		    mBufferGraphics.DrawLine( mAxisPen, n, 0, n, Height );
 		    mBufferGraphics.DrawString( "1px = " + 1d/T + "hz", Font, Brushes.Blue, 10, 10 );

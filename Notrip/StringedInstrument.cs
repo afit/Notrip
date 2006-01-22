@@ -223,7 +223,6 @@ namespace LothianProductions.Notrip {
 			if( mLeftHanded )
 				fret = (Frets - fret) + 1;
 			
-			
 			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length ) {
 
 				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
