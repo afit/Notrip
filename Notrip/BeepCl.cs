@@ -10,7 +10,7 @@ using Microsoft.DirectX;
 using Microsoft.DirectX.DirectSound;
 
 namespace LothianProductions.Notrip {
-	public class BeepCl {
+	public class Beep {
 		const int BuffSz = 320 * 2; //*220 msec.
 		const double TwoMathPI = 2.0 * Math.PI;
 		const int NumberRecordNotifications = 4;
@@ -21,6 +21,7 @@ namespace LothianProductions.Notrip {
 		private bool FillZero = false;
 		private int TimePlaying = 0;
 		private byte[] PlaybackData = new Byte[BuffSz];
+		protected Object mLockObject = new Object();
 		
 		protected Control mControl;	
 		protected bool mPlaying;
@@ -34,7 +35,7 @@ namespace LothianProductions.Notrip {
 		    public int duration; // duration in msec.
 		} Osc osc = new Osc();
 
-		public BeepCl( Control control ) {
+		public Beep( Control control ) {
 			mControl = control;
 			//CreatePlayBuffer();
 
@@ -97,13 +98,7 @@ namespace LothianProductions.Notrip {
 			Frequency = 400;
 		}
 
-		public void Beep() {
-			mPlaying = true;
-			Start();
-			//while(mPlaying);
-			Stop();
-		}
-		//dwFreq 
+		////dwFreq 
 		//[in] Frequency of the soundf, in hertz. This parameter must be in the
 		//     range 37 through 32,767 (0x25 through 0x7FFF). 
 		//dwDuration 
@@ -116,7 +111,8 @@ namespace LothianProductions.Notrip {
 //				TransferData();
 
 				int LockSize;
-
+lock( mLockObject ) {
+mPlaying = true;
 				while (mPlaying) {
 					// poll
 					//from the sdk example
@@ -140,10 +136,13 @@ namespace LothianProductions.Notrip {
 							mPlaying = false;
 					}
 				}
+}
+			Stop();
 		}
 
 		public void Stop() {
 		mPlaying = false;
+			lock( mLockObject ) {
 			buffa.Stop();
 
 			FillZero = true;//output zeros
@@ -164,6 +163,7 @@ namespace LothianProductions.Notrip {
 			buffa.Play(0, BufferPlayFlags.Default);
 
 			FillZero = false;//output zeros
+			}
 		}
 		
 		public int Volume {

@@ -31,7 +31,7 @@ namespace LothianProductions.Notrip {
 		const int ROOT_A4_FREQ = 440;
 		protected int mLastFret;
 		protected int mLastInstrumentString;
-		protected Dictionary<double, BeepCl> mBeeps = new Dictionary<double, BeepCl>();
+		protected Dictionary<double, Beep> mBeeps = new Dictionary<double, Beep>();
 		protected InstrumentString[] mStrings;
 		public InstrumentString[] Strings {
 			get{ return mStrings; }
@@ -90,21 +90,24 @@ namespace LothianProductions.Notrip {
 		protected void PlayNote( double frequency, int duration ) {
 			// Create a new beep object and fire it off on a separate thread.
 			lock( mBeeps ) {
-				BeepCl beep;
+				Beep beep;
 				if( mBeeps.ContainsKey( frequency ) )
 					beep = mBeeps[ frequency ];
 				else {
-					beep = new BeepCl( this );
+					beep = new Beep( this );
 					mBeeps.Add( frequency, beep );
 					beep.Frequency = frequency;
 				}
 				
-				//if( beep.Playing )
-				//    beep.Stop();//.else.Duration = 0;
+				// Turn off permanent tones:
+				if( beep.Playing ) {
+				    beep.Stop();
+					if( beep.Duration == 0 )
+					    return;
+				}
 				
-				//beep.StartOrStopPlay( false );
 				beep.Duration = duration;
-				new Thread( new ThreadStart( beep.Beep ) ).Start();
+				new Thread( new ThreadStart( beep.Start ) ).Start();
 			}
 		}
 		
@@ -220,14 +223,17 @@ namespace LothianProductions.Notrip {
 			if( mLeftHanded )
 				fret = (Frets - fret) + 1;
 			
-			int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
-			double frequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
 			
-			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length )
+			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length ) {
+
+				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
+				double frequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
+
 			    if( e.Button == MouseButtons.Left )
 			        PlayNote( frequency, 500 );
 			    else if( e.Button == MouseButtons.Right )
 			        PlayNote( frequency, 0 );
+			}
 		}
 
 		private void StringedInstrument_MouseMove(object sender, MouseEventArgs e) {
