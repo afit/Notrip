@@ -6,8 +6,7 @@ using System.Threading;
 using Microsoft.DirectX.DirectSound;
 
 namespace LothianProductions.Notrip {
-	public delegate void AudioDataHandler( byte[] samples );
-	public delegate void SpectralAnalysisHandler( Dictionary<double, int> frequencies );
+	public delegate void AudioDataHandler( byte[] samples, Dictionary<double, int> frequencies );
 
 	public class AudioMonitor {
 
@@ -24,7 +23,6 @@ namespace LothianProductions.Notrip {
 		protected AudioMonitor() {}	
 		
 		public event AudioDataHandler AudioDataUpdate;
-		public event SpectralAnalysisHandler SpectralAnalysisUpdate;
 		
 		public AutoResetEvent notificationEvent	= null;
 		public int notifySize = 0;
@@ -50,7 +48,6 @@ namespace LothianProductions.Notrip {
 
 			// Set the notification size
 			notifySize = (1024 > format.AverageBytesPerSecond / BITS_PER_BYTE) ? 1024 : (format.AverageBytesPerSecond / BITS_PER_BYTE);
-			//notifySize = 512;
 			notifySize -= notifySize % format.BlockAlign;   
 
 			CaptureBufferDescription bufferDescription = new CaptureBufferDescription();
@@ -125,29 +122,34 @@ namespace LothianProductions.Notrip {
 				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer
 
 				// Spectral analysis:
-				float T = (float) captureData.Length / (float) AudioMonitor.SAMPLE_RATE;
-				//int n = captureData.Length / 2;
-				frequencies.Clear();
+				float twoT = ((float) captureData.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
+				
+				frequencies = new Dictionary<double,int>();
+				double firstSummation, secondSummation;
+				double twoPInjk = Math.PI / captureData.Length * 4d;
 
 				for( int j = 0; j < captureData.Length / 4; j++ ) {
-					double firstSummation = 0, secondSummation = 0;
-					double twoPInjk = Math.PI / (float) captureData.Length * j * 4d;
+					firstSummation = 0; secondSummation = 0;
+					//double twoPInjk = Math.PI / captureData.Length * j * 4d;
+					double next = twoPInjk * j;
 
-					for(int k = 0; k < captureData.Length / 2; k++ ) {
-						double byK = twoPInjk * k;
+					for( int k = 0; k < captureData.Length / 2; k++ ) {
+						double byK = next * k;
 						firstSummation +=  captureData[k] * Math.Cos(byK);
 						secondSummation += captureData[k] * Math.Sin(byK);
 					}
 					
-					double amp = 4d * Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) ) / (double) captureData.Length;
+					double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) );// / (double) captureData.Length;
 
-					if( j > 0 && amp > 5 )
-						frequencies.Add( j / T *2d, (int) amp );
+					if( j > 0 && amp > (5d / 4d) * (double) captureData.Length )
+						frequencies.Add( j / twoT, (int) ((amp/(double) captureData.Length) * 4d));
 				} 
 
-				AudioDataUpdate( captureData );
-				SpectralAnalysisUpdate( frequencies );
+				AudioDataUpdate( captureData, frequencies );
 			} while( mRunning );
 		}
 	}
+	
+	//protected Dictionary<int, int> listses;
+	
 }
