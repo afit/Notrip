@@ -91,56 +91,40 @@ namespace LothianProductions.Notrip {
             }
         }
 
+		protected Dictionary<double, int> mFrequenciesBelow = new Dictionary<double,int>();
 		public void Highlight( Dictionary<double, int> frequencies ) {
-			//Invalidate();
-//			foreach( double frequency in frequencies.Keys ) {
-//				int fret, instrumentString;
-				
-				//FindFingering( (int) frequency, out fret, out instrumentString );
-				
-				//DrawFingering( Graphics.FromHwnd( Handle ), instrumentString, fret, Brushes.Red );
-//			}
-
-			for( int instrumentString = 0; instrumentString < mStrings.Length; instrumentString++ ) {
-				for( int fret = 0; fret < mFrets; fret++ ) {		
-							
-					int step = -36 + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].RootNote );
-					double fingeredFrequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret) / 12d);
-					
-					//DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.White );
-					
-					foreach( double frequency in frequencies.Keys ) {
-						if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
-							DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.Red );
-							break;
-						}
-					}
-				
-					//DrawFingering( g, i + 1, ii + 1, Brushes.White );
-
-					//if( i == stringHanding[0] ) {
-					//    int stringY = spacingStrings * (Strings.Length + 1);
-					//    int fretX = spacingFrets * (ii + 1);
-					//    String fretNo = Math.Abs( ii + 1 - (mLeftHanded ? mFrets + 1 : 0) ) + "";
-					//    g.DrawString(
-					//        fretNo, Font, Brushes.Black,
-					//        fretX - (g.MeasureString( fretNo, Font ).ToSize().Width / 2),
-					//        stringY - (g.MeasureString( fretNo, Font ).ToSize().Height / 1.5f)
-					//    );
-					//}
-				}
-			}
-		}
+			//foreach( double frequency in mFrequenciesBelow.Keys ) {
+			//    double value = frequency / ROOT_A4_FREQ;
+			//    value = Math.Log( value, 2 );
+			//    value = (value * 12d);
+			//    double octave = value%12d;
+			//    value = value / 12;
+			//    //value = 
+			//    Console.WriteLine( ((int) value) + ":" + octave );
+			//}
 		
-		//protected void FindFingering( int frequency, out int fret, out int instrumentString ) {
-		//    fret = 0; instrumentString = 0;
-			
-		//    int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
-		//    double frequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
-			
-		//    fopr
-			
-		//}
+			for( int instrumentString = 0; instrumentString < mStrings.Length; instrumentString++ ) {
+			    for( int fret = 0; fret < mFrets; fret++ ) {		
+							
+			        int step = -36 + fret + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].RootNote );
+			        double fingeredFrequency = ROOT_A4_FREQ * Math.Pow(2, step / 12d);
+					
+			        foreach( double frequency in mFrequenciesBelow.Keys ) {
+			            if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
+			                DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.White );
+			                break;
+			            }
+			        }
+			        foreach( double frequency in frequencies.Keys ) {
+			            if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
+			                DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.Red );
+			                break;
+			            }
+			        }
+			    }
+			}
+			mFrequenciesBelow = frequencies;
+		}
 	
 		protected void FindFingering( int x, int y, out int fret, out int instrumentString ) {
 			if( Strings.Length == 0 || Frets == 0 ) {
