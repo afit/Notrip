@@ -19,7 +19,6 @@ namespace LothianProductions.Notrip {
 
 		private void ControlForm_Load( object sender, EventArgs e ) {			
 			AudioMonitor.Instance().AudioDataUpdate += new AudioDataHandler( ProcessAudioData );
-			AudioMonitor.Instance().SpectralAnalysisUpdate += new SpectralAnalysisHandler( ProcessSpectralAnalysis );
 		}
 
 		private void ControlForm_FormClosing( object sender, FormClosingEventArgs e ) {
@@ -27,35 +26,23 @@ namespace LothianProductions.Notrip {
 			    AudioMonitor.Instance().Stop();
 		}
 		
-		private delegate void UpdateAudioDataDelegate( byte[] samples );
-		private void UpdateAudioData( byte[] samples ) {
+		private delegate void UpdateAudioDataDelegate( byte[] samples, Dictionary<double, int> frequencies );
+		private void UpdateAudioData( byte[] samples, Dictionary<double, int> frequencies ) {
 			mOscilloscope.AddSamples( samples );
+			InstrumentMain.Highlight( frequencies );
 			
 			// Find and plot max amplitude for volume:
 			byte max = (byte) 128;
 			foreach( byte sample in samples )
-				max = Math.Max( max, sample );
+			    max = Math.Max( max, sample );
 				
 			ProgressAmplitude.Value = max;
 		}
-		public void ProcessAudioData( byte[] samples ) {
+		public void ProcessAudioData( byte[] samples, Dictionary<double, int> frequencies ) {
 			try {
 				Invoke(
 					new UpdateAudioDataDelegate( UpdateAudioData ),
-					new Object[] { samples }
-				);
-			} catch(ObjectDisposedException) {}
-		}
-
-		private delegate void UpdateSpectralAnalysisDelegate( Dictionary<double, int> frequencies );
-		private void UpdateSpectralAnalysis( Dictionary<double, int> frequencies ) {
-			InstrumentMain.Highlight( frequencies );
-		}
-		public void ProcessSpectralAnalysis( Dictionary<double, int> frequencies ) {
-			try {
-				Invoke(
-					new UpdateSpectralAnalysisDelegate( UpdateSpectralAnalysis ),
-					new Object[] { frequencies }
+					new Object[] { samples, frequencies }
 				);
 			} catch(ObjectDisposedException) {}
 		}
