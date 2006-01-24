@@ -113,11 +113,17 @@ namespace LothianProductions.Notrip {
 			    for( int instrumentString = 0; instrumentString < Strings.Length; instrumentString++ ) {		
 					int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
 
-					if( step <= sound.Step && step + Frets > sound.Step )
+					if( step <= sound.Step && step + Frets > sound.Step ) {
+						int fret = sound.Step - step + 1;
+						
+						if( mLeftHanded )
+							fret = Frets + 1 - fret;
+							
 						DrawFingering(
-							Graphics.FromHwnd( Handle ), instrumentString + 1, sound.Step - step + 1,
+							Graphics.FromHwnd( Handle ), instrumentString + 1, fret,
 							new SolidBrush( Color.FromArgb( 255, 255 - (sound.Amplitude >= 64 ? 255 : sound.Amplitude * 4), 255 - (sound.Amplitude >= 64 ? 255 : sound.Amplitude * 4) ) )
 						);
+					}
 			    }
 			mPreviousSounds = sounds;
 		}
@@ -164,6 +170,22 @@ namespace LothianProductions.Notrip {
 			}
 			
 			g.DrawString( label, Font, Brushes.Black, fretX - (g.MeasureString( label, Font ).ToSize().Width / 2), stringY - (g.MeasureString( label, Font ).ToSize().Height / 2) );
+		}
+
+		private void FingerInstrument( int instrumentString, int fret, bool sustain ) {		
+			if( mLeftHanded )
+				fret = (Frets - fret) + 1;
+			
+			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length ) {
+
+				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].Note );
+				double frequency = AudioMonitor.StepToFrequency( step + fret - 1 );
+
+			    if( ! sustain )
+			        AudioMonitor.Instance().PlayNote( frequency, 500, this );
+			    else
+			        AudioMonitor.Instance().PlayNote( frequency, 0, this );
+			}
 		}
 
 		private void StringedInstrument_Paint( object sender, PaintEventArgs e ) {
@@ -242,19 +264,8 @@ namespace LothianProductions.Notrip {
 			int fret, instrumentString;
 			FindFingering( e.X, e.Y, out fret, out instrumentString );
 			
-			if( mLeftHanded )
-				fret = (Frets - fret) + 1;
-			
-			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length ) {
-
-				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].Note );
-				double frequency = AudioMonitor.ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
-
-			    if( e.Button == MouseButtons.Left )
-			        AudioMonitor.Instance().PlayNote( frequency, 500, this );
-			    else if( e.Button == MouseButtons.Right )
-			        AudioMonitor.Instance().PlayNote( frequency, 0, this );
-			}
+			if( e.Button == MouseButtons.Left || e.Button == MouseButtons.Right )
+				FingerInstrument( instrumentString, fret, e.Button == MouseButtons.Right );
 		}
 
 		private void StringedInstrument_MouseMove(object sender, MouseEventArgs e) {
