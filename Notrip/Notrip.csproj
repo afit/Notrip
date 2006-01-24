@@ -45,12 +45,7 @@
     <Compile Include="AudioMonitor.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BeepCl.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="InstrumentString.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Beep.cs" />
     <Compile Include="Note.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -88,12 +83,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Sound.cs" />
     <Compile Include="StringedInstrument.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="StringedInstrument.Designer.cs">
       <DependentUpon>StringedInstrument.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tuning.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

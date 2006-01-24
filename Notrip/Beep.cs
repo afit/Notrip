@@ -11,6 +11,7 @@ using Microsoft.DirectX.DirectSound;
 
 namespace LothianProductions.Notrip {
 	public class Beep {
+		// FIXME up to 16000hz
 		const int BuffSz = 320 * 2; //*220 msec.
 		const double TwoMathPI = 2.0 * Math.PI;
 		const int NumberRecordNotifications = 4;

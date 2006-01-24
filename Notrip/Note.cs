@@ -5,13 +5,6 @@ using System.Text;
 
 namespace LothianProductions.Notrip {
 
-/// <summary>
-/// First octave begins at	-32
-/// Second					-24
-/// Third					-12
-/// Fourth					0
-/// </summary>
-
 	[Serializable()]
 	public enum Note : int {
 		A,

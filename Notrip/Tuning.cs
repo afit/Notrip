@@ -6,15 +6,16 @@ using System.Text;
 namespace LothianProductions.Notrip {
 	
 	[Serializable()]
-	public class InstrumentString {
+	// FIXME rename to Tuning?
+	public class Tuning {
 
-		public InstrumentString( Note note, int octave ) {
+		public Tuning( Note note, int octave ) {
 			mNote = note;
 			mOctave = octave;
 		}
 	
 		protected Note mNote = Note.E;
-		public Note RootNote {
+		public Note Note {
 			get{ return mNote; }
 			set{ mNote = value; }
 		}

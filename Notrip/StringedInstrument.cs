@@ -14,13 +14,13 @@ namespace LothianProductions.Notrip {
 	public partial class StringedInstrument : UserControl {
 		
 		public StringedInstrument() {
-			mStrings = new InstrumentString[] {
-				new InstrumentString( Note.E, 2 ),
-				new InstrumentString( Note.A, 3 ),
-				new InstrumentString( Note.D, 3 ),
-				new InstrumentString( Note.G, 3 ),
-				new InstrumentString( Note.B, 4 ),
-				new InstrumentString( Note.E, 4 )
+			mStrings = new Tuning[] {
+				new Tuning( Note.E, 2 ),
+				new Tuning( Note.A, 3 ),
+				new Tuning( Note.D, 3 ),
+				new Tuning( Note.G, 3 ),
+				new Tuning( Note.B, 4 ),
+				new Tuning( Note.E, 4 )
 			};
 			mFrets = 24;
 			mCapo = 0;
@@ -29,15 +29,14 @@ namespace LothianProductions.Notrip {
 			InitializeComponent();
 		}
 
-		const int ROOT_A4_FREQ = 440;
 		protected Pen mPen = new Pen( Color.Black, 1f );
 		protected Bitmap mBuffer;
 		protected Graphics mBufferGraphics;
 		protected int mLastFret;
 		protected int mLastInstrumentString;
-		protected Dictionary<double, Beep> mBeeps = new Dictionary<double, Beep>();
-		protected InstrumentString[] mStrings;
-		public InstrumentString[] Strings {
+		
+		protected Tuning[] mStrings;
+		public Tuning[] Strings {
 			get{ return mStrings; }
 			set{
 			    mStrings = value;
@@ -59,6 +58,15 @@ namespace LothianProductions.Notrip {
 			get{ return mShowFrequencies; }
 			set{
 				mShowFrequencies = value;
+				Invalidate();
+			}
+		}
+		
+		protected bool mShowOctaves;
+		public bool ShowOctaves {
+			get{ return mShowOctaves; }
+			set{
+				mShowOctaves = value;
 				Invalidate();
 			}
 		}
@@ -93,21 +101,11 @@ namespace LothianProductions.Notrip {
 
 		protected Dictionary<double, int> mFrequenciesBelow = new Dictionary<double,int>();
 		public void Highlight( Dictionary<double, int> frequencies ) {
-			//foreach( double frequency in mFrequenciesBelow.Keys ) {
-			//    double value = frequency / ROOT_A4_FREQ;
-			//    value = Math.Log( value, 2 );
-			//    value = (value * 12d);
-			//    double octave = value%12d;
-			//    value = value / 12;
-			//    //value = 
-			//    Console.WriteLine( ((int) value) + ":" + octave );
-			//}
-		
 			for( int instrumentString = 0; instrumentString < mStrings.Length; instrumentString++ ) {
 			    for( int fret = 0; fret < mFrets; fret++ ) {		
 							
-			        int step = -36 + fret + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].RootNote );
-			        double fingeredFrequency = ROOT_A4_FREQ * Math.Pow(2, step / 12d);
+			        int step = -36 + fret + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].Note );
+			        double fingeredFrequency = AudioMonitor.ROOT_A4_FREQ * Math.Pow(2, step / 12d);
 					
 			        foreach( double frequency in mFrequenciesBelow.Keys ) {
 			            if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
@@ -136,31 +134,6 @@ namespace LothianProductions.Notrip {
 			}
 		}
 
-		// FIXME move this to AudioMonitor?
-		protected void PlayNote( double frequency, int duration ) {
-			// Create a new beep object and fire it off on a separate thread.
-			lock( mBeeps ) {
-				Beep beep;
-				if( mBeeps.ContainsKey( frequency ) )
-					beep = mBeeps[ frequency ];
-				else {
-					beep = new Beep( this );
-					mBeeps.Add( frequency, beep );
-					beep.Frequency = frequency;
-				}
-				
-				// Turn off permanent tones:
-				if( beep.Playing ) {
-				    beep.Stop();
-					if( beep.Duration == 0 )
-					    return;
-				}
-				
-				beep.Duration = duration;
-				new Thread( new ThreadStart( beep.Start ) ).Start();
-			}
-		}
-
 		protected void DrawFingering( Graphics g, int instrumentString, int fret, Brush brush ) {
 			int spacingFrets = Width / ( Frets + 1 );
 			int spacingStrings = Height / ( Strings.Length + 1 );
@@ -175,14 +148,21 @@ namespace LothianProductions.Notrip {
 			String label;
 			if( ! mShowFrequencies ) {
 
-				int noteIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote ) + fret - 1;
-				while( noteIndex > 11 )
+				int noteIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].Note ) + fret - 1;
+				int octave = Strings[instrumentString - 1].Octave;
+				
+				while( noteIndex > 11 ) {
 					noteIndex -= 12;
+					octave++;
+				}
 				label = NoteHelper.Instance().GetOrderedNoteNames()[ noteIndex ];
+				
+				if( mShowOctaves )
+					label += "" + octave;
 			} else {
 				// Convert to int to display more cleanly:
-				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
-				label = (int) (ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d)) + "";
+				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].Note );
+				label = (int) (AudioMonitor.ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d)) + "";
 			}
 			
 			g.DrawString( label, Font, Brushes.Black, fretX - (g.MeasureString( label, Font ).ToSize().Width / 2), stringY - (g.MeasureString( label, Font ).ToSize().Height / 2) );
@@ -269,13 +249,13 @@ namespace LothianProductions.Notrip {
 			
 			if( fret - 1 >= 0 && instrumentString - 1 >= 0 && fret - 1 < Frets && instrumentString - 1 < Strings.Length ) {
 
-				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].RootNote );
-				double frequency = ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
+				int step = -36 + ((Strings[instrumentString - 1].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString - 1].Note );
+				double frequency = AudioMonitor.ROOT_A4_FREQ * Math.Pow(2, (step + fret - 1) / 12d);
 
 			    if( e.Button == MouseButtons.Left )
-			        PlayNote( frequency, 500 );
+			        AudioMonitor.Instance().PlayNote( frequency, 500, this );
 			    else if( e.Button == MouseButtons.Right )
-			        PlayNote( frequency, 0 );
+			        AudioMonitor.Instance().PlayNote( frequency, 0, this );
 			}
 		}
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 using Microsoft.DirectX.DirectSound;
 
@@ -11,6 +12,9 @@ namespace LothianProductions.Notrip {
 	public class AudioMonitor {
 
 		public const int SAMPLE_RATE = 16000;
+		public const int ROOT_A4_FREQ = 440;
+		
+		protected Dictionary<double, Beep> mBeeps = new Dictionary<double, Beep>();
 		protected static readonly AudioMonitor mInstance = new AudioMonitor();
 		protected const int NO_RECORD_NOTIFICATIONS = 16;
 		protected const int BITS_PER_BYTE = 8;
@@ -130,7 +134,6 @@ namespace LothianProductions.Notrip {
 
 				for( int j = 0; j < captureData.Length / 4; j++ ) {
 					firstSummation = 0; secondSummation = 0;
-					//double twoPInjk = Math.PI / captureData.Length * j * 4d;
 					double next = twoPInjk * j;
 
 					for( int k = 0; k < captureData.Length / 2; k++ ) {
@@ -139,17 +142,78 @@ namespace LothianProductions.Notrip {
 						secondSummation += captureData[k] * Math.Sin(byK);
 					}
 					
-					double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation,2) + Math.Pow(secondSummation,2)) );// / (double) captureData.Length;
+					double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
 
-					if( j > 0 && amp > (5d / 4d) * (double) captureData.Length )
-						frequencies.Add( j / twoT, (int) ((amp/(double) captureData.Length) * 4d));
+					if( j > 0 && amp > (5d / 4d) * (double) captureData.Length ) {
+						int amplitude = (int) ((amp / (double) captureData.Length) * 4d);
+						double compensation;
+						double frequency = (j / twoT) * 4d;
+						int octave;
+						int step = FrequencyToStep( frequency, out compensation );
+						Note note = StepToNote( step, out octave );
+						Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
+						
+						if( frequencies.ContainsKey( step ) )
+							frequencies[ step ] += amplitude;
+						else
+							frequencies.Add( step, amplitude );
+					}
 				} 
 
 				AudioDataUpdate( captureData, frequencies );
 			} while( mRunning );
 		}
+		
+		/// <summary>
+		/// First octave begins at	-36
+		/// Second					-24
+		/// Third					-12
+		/// Fourth					0
+		/// </summary>
+		public static int FrequencyToStep( double frequency, out double compensation ) {
+			double step = (Math.Log( frequency / AudioMonitor.ROOT_A4_FREQ, 2 ) * 12d) % 12d;
+			compensation = step - (int) step;
+			if( compensation < -0.5d ) {
+				compensation += 1d;
+			    return ((int) step) - 1;
+			} else 
+			    return (int) step;
+			//return (int) step - (compensation < -0.5d ? 1 : 0 );
+		}
+		
+		public static Note StepToNote( int step, out int octave ) {
+			octave = 1;
+			// Whilst greater than the end of the first octave, count one:
+			while( step > -25 ) {
+				step -= 12;
+				octave++;
+			}
+			
+			return NoteHelper.Instance().GetOrderedNotes()[step + 36];
+		}
+		
+		public void PlayNote( double frequency, int duration, Control control ) {
+			// Create a new beep object and fire it off on a separate thread.
+			lock( mBeeps ) {
+				Beep beep;
+				if( mBeeps.ContainsKey( frequency ) )
+					beep = mBeeps[ frequency ];
+				else {
+					beep = new Beep( control );
+					mBeeps.Add( frequency, beep );
+					beep.Frequency = frequency;
+				}
+				
+				// Turn off permanent tones:
+				if( beep.Playing ) {
+				    beep.Stop();
+					if( beep.Duration == 0 )
+					    return;
+				}
+				
+				beep.Duration = duration;
+				new Thread( new ThreadStart( beep.Start ) ).Start();
+			}
+		}
 	}
-	
-	//protected Dictionary<int, int> listses;
-	
 }
