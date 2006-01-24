@@ -99,29 +99,27 @@ namespace LothianProductions.Notrip {
             }
         }
 
-		protected Dictionary<double, int> mFrequenciesBelow = new Dictionary<double,int>();
-		public void Highlight( Dictionary<double, int> frequencies ) {
-			for( int instrumentString = 0; instrumentString < mStrings.Length; instrumentString++ ) {
-			    for( int fret = 0; fret < mFrets; fret++ ) {		
-							
-			        int step = -36 + fret + ((Strings[instrumentString].Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( Strings[instrumentString].Note );
-			        double fingeredFrequency = AudioMonitor.ROOT_A4_FREQ * Math.Pow(2, step / 12d);
+		protected List<Sound> mPreviousSounds = new List<Sound>();
+		public void Highlight( List<Sound> sounds ) {
+			foreach( Sound sound in mPreviousSounds )
+			    for( int instrumentString = 0; instrumentString < Strings.Length; instrumentString++ ) {		
+					int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
 					
-			        foreach( double frequency in mFrequenciesBelow.Keys ) {
-			            if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
-			                DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.White );
-			                break;
-			            }
-			        }
-			        foreach( double frequency in frequencies.Keys ) {
-			            if( frequency + 2 > fingeredFrequency && frequency - 2 < fingeredFrequency ) {
-			                DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret + 1, Brushes.Red );
-			                break;
-			            }
-			        }
+					if( step <= sound.Step && step + Frets > sound.Step )
+						DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, sound.Step - step + 1, Brushes.White );
 			    }
-			}
-			mFrequenciesBelow = frequencies;
+			    
+			foreach( Sound sound in sounds )
+			    for( int instrumentString = 0; instrumentString < Strings.Length; instrumentString++ ) {		
+					int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
+
+					if( step <= sound.Step && step + Frets > sound.Step )
+						DrawFingering(
+							Graphics.FromHwnd( Handle ), instrumentString + 1, sound.Step - step + 1,
+							new SolidBrush( Color.FromArgb( 255, 255 - (sound.Amplitude >= 64 ? 255 : sound.Amplitude * 4), 255 - (sound.Amplitude >= 64 ? 255 : sound.Amplitude * 4) ) )
+						);
+			    }
+			mPreviousSounds = sounds;
 		}
 	
 		protected void FindFingering( int x, int y, out int fret, out int instrumentString ) {

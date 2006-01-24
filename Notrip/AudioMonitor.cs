@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Microsoft.DirectX.DirectSound;
 
 namespace LothianProductions.Notrip {
-	public delegate void AudioDataHandler( byte[] samples, Dictionary<double, int> frequencies );
+	public delegate void AudioDataHandler( byte[] samples, List<Sound> sounds );
 
 	public class AudioMonitor {
 
@@ -100,7 +100,7 @@ namespace LothianProductions.Notrip {
 			int readPos = 0;
 			int capturePos = 0;
 			int lockSize;
-			Dictionary<double, int> frequencies = new Dictionary<double, int>();
+			Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
 			
 			do {
 				// Wait for a notification:
@@ -128,7 +128,7 @@ namespace LothianProductions.Notrip {
 				// Spectral analysis:
 				float twoT = ((float) captureData.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
 				
-				frequencies = new Dictionary<double,int>();
+				sounds = new Dictionary<int, Sound>();
 				double firstSummation, secondSummation;
 				double twoPInjk = Math.PI / captureData.Length * 4d;
 
@@ -151,16 +151,21 @@ namespace LothianProductions.Notrip {
 						int octave;
 						int step = FrequencyToStep( frequency, out compensation );
 						Note note = StepToNote( step, out octave );
-						Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
+						//Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
+						Sound sound = new Sound( note, octave, step, amplitude, compensation );
 						
-						if( frequencies.ContainsKey( step ) )
-							frequencies[ step ] += amplitude;
+						// FIXME deal with multiple sounds of same freq.
+						//if( sounds.ContainsKey( sound.ToTuning() ) )
+						//Sounds.Add(  );
+						
+						if( sounds.ContainsKey( step ) )
+							sounds[ step ].Amplitude += amplitude;
 						else
-							frequencies.Add( step, amplitude );
+							sounds.Add( step, sound );
 					}
-				} 
+				}
 
-				AudioDataUpdate( captureData, frequencies );
+				AudioDataUpdate( captureData, new List<Sound>( sounds.Values ) );
 			} while( mRunning );
 		}
 		
@@ -178,9 +183,9 @@ namespace LothianProductions.Notrip {
 			    return ((int) step) - 1;
 			} else 
 			    return (int) step;
-			//return (int) step - (compensation < -0.5d ? 1 : 0 );
 		}
 		
+		[Obsolete("Should be StepToTuning")]
 		public static Note StepToNote( int step, out int octave ) {
 			octave = 1;
 			// Whilst greater than the end of the first octave, count one:
@@ -190,6 +195,10 @@ namespace LothianProductions.Notrip {
 			}
 			
 			return NoteHelper.Instance().GetOrderedNotes()[step + 36];
+		}
+		
+		public static int TuningToStep( Tuning tuning ) {
+			return -36 + ((tuning.Octave - 1) * 12) + NoteHelper.Instance().GetOrderedNotes().IndexOf( tuning.Note );
 		}
 		
 		public void PlayNote( double frequency, int duration, Control control ) {

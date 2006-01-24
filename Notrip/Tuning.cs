@@ -6,9 +6,7 @@ using System.Text;
 namespace LothianProductions.Notrip {
 	
 	[Serializable()]
-	// FIXME rename to Tuning?
 	public class Tuning {
-
 		public Tuning( Note note, int octave ) {
 			mNote = note;
 			mOctave = octave;
@@ -24,6 +22,6 @@ namespace LothianProductions.Notrip {
 		public int Octave {
 			get{ return mOctave; }
 			set{ mOctave = value; }
-		}	
+		}
 	}
 }
