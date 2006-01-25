@@ -100,16 +100,29 @@ namespace LothianProductions.Notrip {
         }
 
 		protected List<Sound> mPreviousSounds = new List<Sound>();
-		public void Highlight( List<Sound> sounds ) {
-			foreach( Sound sound in mPreviousSounds )
+		public void Highlight( List<Sound> sounds, bool playHighlighted ) {
+			foreach( Sound sound in mPreviousSounds ) {
+				if( playHighlighted )
+					AudioMonitor.Instance().PlayNote( AudioMonitor.StepToFrequency( sound.Step ), 0, this );
+					
 			    for( int instrumentString = 0; instrumentString < Strings.Length; instrumentString++ ) {		
 					int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
 					
-					if( step <= sound.Step && step + Frets > sound.Step )
-						DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, sound.Step - step + 1, Brushes.White );
+					if( step <= sound.Step && step + Frets > sound.Step ) {
+						int fret = sound.Step - step + 1;
+						
+						if( mLeftHanded )
+							fret = Frets + 1 - fret;
+							
+						DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret, Brushes.White );
+					}
 			    }
+			}
 			    
-			foreach( Sound sound in sounds )
+			foreach( Sound sound in sounds ) {
+				if( playHighlighted )
+					AudioMonitor.Instance().PlayNote( AudioMonitor.StepToFrequency( sound.Step ), 0, this );
+					
 			    for( int instrumentString = 0; instrumentString < Strings.Length; instrumentString++ ) {		
 					int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
 
@@ -125,6 +138,7 @@ namespace LothianProductions.Notrip {
 						);
 					}
 			    }
+			}
 			mPreviousSounds = sounds;
 		}
 	
