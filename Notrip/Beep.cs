@@ -40,18 +40,14 @@ namespace LothianProductions.Notrip {
 					
             WaveFormat format = new WaveFormat();
             format.FormatTag = WaveFormatTag.Pcm;
-            format.Channels = 2;
+            format.Channels = 1;//2;
             format.BitsPerSample = 16;
             format.SamplesPerSecond = AudioMonitor.SAMPLE_RATE;
-            format.BlockAlign = 2*2;//(short) (format.Channels * (format.BitsPerSample / AudioMonitor.BITS_PER_BYTE ));
-            format.AverageBytesPerSecond = 16000*2;//format.BlockAlign * format.SamplesPerSecond;
+            format.BlockAlign = (short) (format.Channels * (format.BitsPerSample / AudioMonitor.BITS_PER_BYTE ));
+            format.AverageBytesPerSecond = format.BlockAlign * format.SamplesPerSecond;
 
-            //OutputBufferSize = NumberRecordNotifications * ((AudioMonitor.SAMPLE_RATE/100) *  (format.BitsPerSample / AudioMonitor.BITS_PER_BYTE) * format.Channels); // *(10msec)
-            OutputBufferSize = NumberRecordNotifications * (160 * 2 * 2);
-            //const int BuffSz = 320 * 2; //*220 msec.
-            //const int BuffSz = AudioMonitor.SAMPLE_RATE / 25;
-            //PlaybackData = new Byte[AudioMonitor.SAMPLE_RATE / 25];
-            PlaybackData = new Byte[320 * 2]; //*220msc
+            OutputBufferSize = NumberRecordNotifications * ((AudioMonitor.SAMPLE_RATE/100) *  (format.BitsPerSample / AudioMonitor.BITS_PER_BYTE) * format.Channels); // *(10msec)
+            PlaybackData = new Byte[AudioMonitor.SAMPLE_RATE / 25];
 
             BufferDescription bufferDescription = new BufferDescription();
             bufferDescription.Format = format;
@@ -105,9 +101,7 @@ namespace LothianProductions.Notrip {
 							if( osc.phase > TwoMathPI )
 								osc.phase -= TwoMathPI;
 
-							//stereo 16-bit pcm format
-							PlaybackData[k++] = (byte)(outword & 0xff);//lsb
-							PlaybackData[k++] = (byte)((outword >> 8) & 0xff);//msb
+							//mono 16-bit pcm format
 							PlaybackData[k++] = (byte)(outword & 0xff);//lsb
 							PlaybackData[k++] = (byte)((outword >> 8) & 0xff);//msb
 						}
