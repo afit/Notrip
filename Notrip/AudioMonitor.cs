@@ -11,13 +11,13 @@ namespace LothianProductions.Notrip {
 
 	public class AudioMonitor {
 
-		public const int SAMPLE_RATE = 16000;
+		public const int SAMPLE_RATE = 44000;
 		public const int ROOT_A4_FREQ = 440;
+		protected const int NO_RECORD_NOTIFICATIONS = 16;
+		public const short BITS_PER_BYTE = 8;
 		
 		protected Dictionary<double, Beep> mBeeps = new Dictionary<double, Beep>();
 		protected static readonly AudioMonitor mInstance = new AudioMonitor();
-		protected const int NO_RECORD_NOTIFICATIONS = 16;
-		protected const int BITS_PER_BYTE = 8;
 
 		public static AudioMonitor Instance() {
 			return mInstance;
@@ -33,6 +33,12 @@ namespace LothianProductions.Notrip {
 		
 		protected int mCaptureBufferSize;
 		protected CaptureBuffer mCaptureBuffer;
+		
+		protected List<double> mFrequencies;
+		public List<double> Frequencies {
+			get{ return mFrequencies; }
+			set{ mFrequencies = value; }
+		}
 		
 		protected bool mRunning = false;
 		public bool IsRunning {
@@ -100,7 +106,6 @@ namespace LothianProductions.Notrip {
 			int readPos = 0;
 			int capturePos = 0;
 			int lockSize;
-			Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
 			
 			do {
 				// Wait for a notification:
@@ -125,59 +130,93 @@ namespace LothianProductions.Notrip {
 				nextCaptureOffset += captureData.Length; 
 				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer
 
-				// Spectral analysis:
-				float twoT = ((float) captureData.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
-				
-				sounds = new Dictionary<int, Sound>();
-				double firstSummation, secondSummation;
-				double twoPInjk = Math.PI / captureData.Length * 4d;
-
-				for( int j = 0; j < captureData.Length / 4; j++ ) {
-					firstSummation = 0; secondSummation = 0;
-					double next = twoPInjk * j;
-
-					for( int k = 0; k < captureData.Length / 2; k++ ) {
-						double byK = next * k;
-						firstSummation +=  captureData[k] * Math.Cos(byK);
-						secondSummation += captureData[k] * Math.Sin(byK);
-					}
-					
-					double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
-
-					if( j > 0 && amp > (5d / 4d) * (double) captureData.Length ) {
-						int amplitude = (int) ((amp / (double) captureData.Length) * 4d);
-						double compensation;
-						double frequency = (j / twoT) * 4d;
-						int octave;
-						int step = FrequencyToStep( frequency, out compensation );
-						Note note = StepToNote( step, out octave );
-						//Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
-						Sound sound = new Sound( note, octave, step, amplitude, compensation );
-						
-						// FIXME deal with multiple sounds of same freq.
-						//if( sounds.ContainsKey( sound.ToTuning() ) )
-						//Sounds.Add(  );
-						
-						if( sounds.ContainsKey( step ) )
-							sounds[ step ].Amplitude += amplitude;
-						else
-							sounds.Add( step, sound );
-					}
-				}
-
-				AudioDataUpdate( captureData, new List<Sound>( sounds.Values ) );
+				AudioDataUpdate( captureData, SamplesToSounds( captureData, mFrequencies ) );
 			} while( mRunning );
 		}
 		
-		/// <summary>
-		/// First octave begins at	-36
-		/// Second					-24
-		/// Third					-12
-		/// Fourth					0
-		/// </summary>
+		public List<Sound> SamplesToSounds( byte[] samples, List<double> frequencies ) {
+		    // Spectral analysis:
+		    float twoT = ((float) samples.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
+			
+		    Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
+		    double firstSummation, secondSummation;
+
+		    foreach( double frequency in frequencies ) {
+		        firstSummation = 0; secondSummation = 0;
+		        double next = (frequency / 4d) * twoT;
+
+		        for( int k = 0; k < samples.Length / 2; k++ ) {
+		            double byK = next * k;
+		            firstSummation +=  samples[k] * Math.Cos(byK);
+		            secondSummation += samples[k] * Math.Sin(byK);
+		        }
+				
+		        double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
+		        int amplitude = (int) ((amp / (double) samples.Length) * 4d);
+				
+		        if( amplitude > 5 ) {
+		            double compensation;
+		            int octave;
+		            int step = FrequencyToStep( frequency, out compensation );
+		            Note note = StepToNote( step, out octave );
+		            Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
+		            Sound sound = new Sound( note, octave, step, amplitude, compensation );
+					
+		            if( sounds.ContainsKey( step ) )
+		                sounds[ step ].Amplitude += amplitude;
+		            else
+		                sounds.Add( step, sound );
+		        }
+		    }
+			
+		    return new List<Sound>( sounds.Values );
+		}
+		
+		public List<Sound> SamplesToSounds( byte[] samples ) {
+		    // Spectral analysis:
+		    float twoT = ((float) samples.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
+			
+		    Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
+		    double firstSummation, secondSummation;
+		    double twoPInjk = Math.PI / samples.Length * 4d;
+
+		    for( int j = 0; j < samples.Length / 4; j++ ) {
+		        firstSummation = 0; secondSummation = 0;
+		        double next = twoPInjk * j;
+
+		        for( int k = 0; k < samples.Length / 2; k++ ) {
+		            double byK = next * k;
+		            firstSummation +=  samples[k] * Math.Cos(byK);
+		            secondSummation += samples[k] * Math.Sin(byK);
+		        }
+				
+		        double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
+		        int amplitude = (int) ((amp / (double) samples.Length) * 4d);
+
+		        if( j > 0 && amplitude > 5 ) {
+		            double compensation;
+		            double frequency = (j / twoT) * 4d;
+		            int octave;
+		            int step = FrequencyToStep( frequency, out compensation );
+		            Note note = StepToNote( step, out octave );
+		            //Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
+		            Sound sound = new Sound( note, octave, step, amplitude, compensation );
+					
+		            if( sounds.ContainsKey( step ) )
+		                sounds[ step ].Amplitude += amplitude;
+		            else
+		                sounds.Add( step, sound );
+		        }
+		    }
+			
+		    return new List<Sound>( sounds.Values );
+		}
+
+
 		public static int FrequencyToStep( double frequency, out double compensation ) {
 			double step = (Math.Log( frequency / AudioMonitor.ROOT_A4_FREQ, 2 ) * 12d) % 12d;
 			compensation = step - (int) step;
+						
 			if( compensation < -0.5d ) {
 				compensation += 1d;
 			    return ((int) step) - 1;
@@ -185,7 +224,12 @@ namespace LothianProductions.Notrip {
 			    return (int) step;
 		}
 		
+		public static double StepToFrequency( int step ) {
+			return ROOT_A4_FREQ * Math.Pow(2, step / 12d);
+		}
+		
 		[Obsolete("Should be StepToTuning")]
+		
 		public static Note StepToNote( int step, out int octave ) {
 			octave = 1;
 			// Whilst greater than the end of the first octave, count one:
@@ -214,7 +258,9 @@ namespace LothianProductions.Notrip {
 				}
 				
 				// Turn off permanent tones:
-				if( beep.Playing ) {
+				if( beep.Playing && beep.Duration > 0 && beep.Duration == duration )
+					return;
+				else if( beep.Playing ) {
 				    beep.Stop();
 					if( beep.Duration == 0 )
 					    return;
