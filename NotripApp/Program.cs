@@ -13,6 +13,8 @@ namespace LothianProductions.Notrip {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault( false );
 			Application.Run( new ControlForm() );
+			
+			// FIXME add decent error handling!
 		}
 	}
 }
