@@ -34,10 +34,16 @@ namespace LothianProductions.Notrip {
 		protected int mCaptureBufferSize;
 		protected CaptureBuffer mCaptureBuffer;
 		
-		protected List<double> mFrequencies;
+		protected List<double> mFrequencies = new List<double>();
 		public List<double> Frequencies {
 			get{ return mFrequencies; }
 			set{ mFrequencies = value; }
+		}
+
+		protected int mSensitivity = 5;
+		public int Sensitivity {
+			get{ return mSensitivity; }
+			set{ mSensitivity = value; }
 		}
 		
 		protected bool mRunning = false;
@@ -140,10 +146,12 @@ namespace LothianProductions.Notrip {
 			
 		    Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
 		    double firstSummation, secondSummation;
+		    double twoPInjk = Math.PI / samples.Length * 4d;
 
 		    foreach( double frequency in frequencies ) {
 		        firstSummation = 0; secondSummation = 0;
-		        double next = (frequency / 4d) * twoT;
+		        // Fix the frequency: int = double oldJ = ((frequency / 4d) * twoT);// / twoPInjk;
+		        double next = ((frequency / 4d) * twoT) * twoPInjk;
 
 		        for( int k = 0; k < samples.Length / 2; k++ ) {
 		            double byK = next * k;
@@ -153,13 +161,14 @@ namespace LothianProductions.Notrip {
 				
 		        double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
 		        int amplitude = (int) ((amp / (double) samples.Length) * 4d);
+		        //Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency );
 				
-		        if( amplitude > 5 ) {
+		        if( amplitude > mSensitivity ) {
 		            double compensation;
 		            int octave;
 		            int step = FrequencyToStep( frequency, out compensation );
 		            Note note = StepToNote( step, out octave );
-		            Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
+					//Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
 		            Sound sound = new Sound( note, octave, step, amplitude, compensation );
 					
 		            if( sounds.ContainsKey( step ) )
@@ -212,9 +221,11 @@ namespace LothianProductions.Notrip {
 		    return new List<Sound>( sounds.Values );
 		}
 
-
 		public static int FrequencyToStep( double frequency, out double compensation ) {
-			double step = (Math.Log( frequency / AudioMonitor.ROOT_A4_FREQ, 2 ) * 12d) % 12d;
+			double step = (Math.Log( frequency / AudioMonitor.ROOT_A4_FREQ, 2 ) * 12d);// * 12d;
+			//if( frequency == 440 || frequency == 1760 )
+				//Console.WriteLine( frequency + ":" + frequency / AudioMonitor.ROOT_A4_FREQ + ":" + Math.Log( frequency / AudioMonitor.ROOT_A4_FREQ, 2 ) + ":" + (Math.Log( frequency / AudioMonitor.ROOT_A4_FREQ, 2 ) * 12d) + ":" + step );
+			
 			compensation = step - (int) step;
 						
 			if( compensation < -0.5d ) {
@@ -227,9 +238,19 @@ namespace LothianProductions.Notrip {
 		public static double StepToFrequency( int step ) {
 			return ROOT_A4_FREQ * Math.Pow(2, step / 12d);
 		}
-		
+
+		public static Tuning StepToTuning( int step ) {
+			int octave = 1;
+			// Whilst greater than the end of the first octave, count one:
+			while( step > -25 ) {
+				step -= 12;
+				octave++;
+			}
+			
+			return new Tuning( NoteHelper.Instance().GetOrderedNotes()[step + 36], octave );
+		}
+	
 		[Obsolete("Should be StepToTuning")]
-		
 		public static Note StepToNote( int step, out int octave ) {
 			octave = 1;
 			// Whilst greater than the end of the first octave, count one:
