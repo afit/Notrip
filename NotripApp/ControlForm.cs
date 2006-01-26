@@ -223,6 +223,10 @@ namespace LothianProductions.Notrip {
 		}
 
 		private void TimerDemo_Tick( object sender, EventArgs e ) {
+			if( AudioMonitor.Instance().IsRunning )
+				AudioMonitor.Instance().Stop();
+			Hide();
+			
 			MessageBox.Show( this, "This test version of Notrip may only be run for three minutes. It will now shut down.\n\nA newer version might be available, let's see...", "Notrip", MessageBoxButtons.OK, MessageBoxIcon.Information );
 			System.Diagnostics.Process.Start( "http://www.lothianproductions.co.uk/notrip" );
 			Application.Exit();		
