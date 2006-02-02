@@ -98,7 +98,7 @@ namespace LothianProductions.Notrip {
 			        int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
 					
 			        if( step <= sound.Step && step + Frets > sound.Step ) {
-			            int fret = sound.Step - step + 1;
+			            int fret = sound.Step - step;
 						
 			            if( mLeftHanded )
 			                fret = mFrets - fret;
@@ -116,7 +116,7 @@ namespace LothianProductions.Notrip {
 			        int step = AudioMonitor.TuningToStep( Strings[instrumentString] );
 
 			        if( step <= sound.Step && step + Frets > sound.Step ) {
-			            int fret = sound.Step - step + 1;
+			            int fret = sound.Step - step;
 						
 			            if( mLeftHanded )
 			                fret = mFrets - fret;
@@ -180,8 +180,7 @@ namespace LothianProductions.Notrip {
 				fret = mFrets - fret;
 			
 			if( fret >= 0 && instrumentString - 1 >= 0 && fret <= Frets && instrumentString - 1 < Strings.Length ) {
-				int step = AudioMonitor.TuningToStep( Strings[instrumentString - 1] );
-				double frequency = AudioMonitor.StepToFrequency( step + fret - 1 );
+				double frequency = AudioMonitor.StepToFrequency( AudioMonitor.TuningToStep( Strings[instrumentString - 1] ) + fret );
 
 			    if( ! sustain )
 			        AudioMonitor.Instance().PlayNote( frequency, 500, this );
