@@ -48,7 +48,6 @@ namespace LothianProductions.Notrip {
 			this.NumericFrets = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
-			this.CheckReveal = new System.Windows.Forms.CheckBox();
 			this.label7 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.NumericSpeed = new System.Windows.Forms.NumericUpDown();
@@ -56,14 +55,15 @@ namespace LothianProductions.Notrip {
 			this.ButtonRepeat = new System.Windows.Forms.Button();
 			this.ButtonPlay = new System.Windows.Forms.Button();
 			this.GroupWaveformPreview = new System.Windows.Forms.GroupBox();
+			this.ProgressAmplitude = new System.Windows.Forms.ProgressBar();
 			this.mOscilloscope = new LothianProductions.Notrip.Oscilloscope();
 			this.label6 = new System.Windows.Forms.Label();
 			this.ComboChord = new System.Windows.Forms.ComboBox();
 			this.RadioFifth = new System.Windows.Forms.RadioButton();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
-			this.ProgressAmplitude = new System.Windows.Forms.ProgressBar();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
 			this.TimerDemo = new System.Windows.Forms.Timer( this.components );
+			this.keyedInstrument1 = new LothianProductions.Notrip.KeyedInstrument();
 			this.groupBox1.SuspendLayout();
 			( (System.ComponentModel.ISupportInitialize) ( this.NumericStrings ) ).BeginInit();
 			this.groupBox3.SuspendLayout();
@@ -213,7 +213,6 @@ namespace LothianProductions.Notrip {
 			// ComboInstrument
 			// 
 			this.ComboInstrument.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.ComboInstrument.Enabled = false;
 			this.ComboInstrument.FormattingEnabled = true;
 			this.ComboInstrument.Items.AddRange( new object[] {
             "Stringed instrument",
@@ -222,6 +221,7 @@ namespace LothianProductions.Notrip {
 			this.ComboInstrument.Name = "ComboInstrument";
 			this.ComboInstrument.Size = new System.Drawing.Size( 141, 21 );
 			this.ComboInstrument.TabIndex = 22;
+			this.ComboInstrument.SelectedIndexChanged += new System.EventHandler( this.ComboInstrument_SelectedIndexChanged );
 			// 
 			// label3
 			// 
@@ -309,8 +309,7 @@ namespace LothianProductions.Notrip {
 			// 
 			// InstrumentMain
 			// 
-			this.InstrumentMain.Capo = 0;
-			this.InstrumentMain.Frets = 24;
+			this.InstrumentMain.Frets = 23;
 			this.InstrumentMain.Horizontal = true;
 			this.InstrumentMain.LeftHanded = false;
 			this.InstrumentMain.Location = new System.Drawing.Point( 6, 65 );
@@ -341,16 +340,11 @@ namespace LothianProductions.Notrip {
 			// NumericFrets
 			// 
 			this.NumericFrets.Location = new System.Drawing.Point( 146, 44 );
-			this.NumericFrets.Minimum = new decimal( new int[] {
-            1,
-            0,
-            0,
-            0} );
 			this.NumericFrets.Name = "NumericFrets";
 			this.NumericFrets.Size = new System.Drawing.Size( 50, 20 );
 			this.NumericFrets.TabIndex = 27;
 			this.NumericFrets.Value = new decimal( new int[] {
-            24,
+            23,
             0,
             0,
             0} );
@@ -373,16 +367,6 @@ namespace LothianProductions.Notrip {
 			this.label4.Size = new System.Drawing.Size( 42, 13 );
 			this.label4.TabIndex = 24;
 			this.label4.Text = "Strings:";
-			// 
-			// CheckReveal
-			// 
-			this.CheckReveal.AutoSize = true;
-			this.CheckReveal.Location = new System.Drawing.Point( 15, 139 );
-			this.CheckReveal.Name = "CheckReveal";
-			this.CheckReveal.Size = new System.Drawing.Size( 98, 17 );
-			this.CheckReveal.TabIndex = 38;
-			this.CheckReveal.Text = "Reveal random";
-			this.CheckReveal.UseVisualStyleBackColor = true;
 			// 
 			// label7
 			// 
@@ -472,17 +456,28 @@ namespace LothianProductions.Notrip {
 			this.GroupWaveformPreview.Controls.Add( this.mOscilloscope );
 			this.GroupWaveformPreview.Location = new System.Drawing.Point( 13, 237 );
 			this.GroupWaveformPreview.Name = "GroupWaveformPreview";
-			this.GroupWaveformPreview.Size = new System.Drawing.Size( 377, 166 );
+			this.GroupWaveformPreview.Size = new System.Drawing.Size( 377, 144 );
 			this.GroupWaveformPreview.TabIndex = 25;
 			this.GroupWaveformPreview.TabStop = false;
 			this.GroupWaveformPreview.Text = "Waveform Preview";
+			// 
+			// ProgressAmplitude
+			// 
+			this.ProgressAmplitude.Location = new System.Drawing.Point( 8, 128 );
+			this.ProgressAmplitude.Maximum = 255;
+			this.ProgressAmplitude.Minimum = 128;
+			this.ProgressAmplitude.Name = "ProgressAmplitude";
+			this.ProgressAmplitude.Size = new System.Drawing.Size( 358, 10 );
+			this.ProgressAmplitude.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+			this.ProgressAmplitude.TabIndex = 28;
+			this.ProgressAmplitude.Value = 128;
 			// 
 			// mOscilloscope
 			// 
 			this.mOscilloscope.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.mOscilloscope.Location = new System.Drawing.Point( 1, 19 );
 			this.mOscilloscope.Name = "mOscilloscope";
-			this.mOscilloscope.Size = new System.Drawing.Size( 375, 125 );
+			this.mOscilloscope.Size = new System.Drawing.Size( 375, 108 );
 			this.mOscilloscope.TabIndex = 4;
 			// 
 			// label6
@@ -537,21 +532,9 @@ namespace LothianProductions.Notrip {
 			this.groupBox5.TabStop = false;
 			this.groupBox5.Text = "Chords && Scales";
 			// 
-			// ProgressAmplitude
-			// 
-			this.ProgressAmplitude.Location = new System.Drawing.Point( 9, 150 );
-			this.ProgressAmplitude.Maximum = 255;
-			this.ProgressAmplitude.Minimum = 128;
-			this.ProgressAmplitude.Name = "ProgressAmplitude";
-			this.ProgressAmplitude.Size = new System.Drawing.Size( 358, 10 );
-			this.ProgressAmplitude.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-			this.ProgressAmplitude.TabIndex = 28;
-			this.ProgressAmplitude.Value = 128;
-			// 
 			// groupBox6
 			// 
 			this.groupBox6.Controls.Add( this.ButtonPlay );
-			this.groupBox6.Controls.Add( this.CheckReveal );
 			this.groupBox6.Controls.Add( this.ButtonRepeat );
 			this.groupBox6.Controls.Add( this.label7 );
 			this.groupBox6.Controls.Add( this.label1 );
@@ -559,20 +542,31 @@ namespace LothianProductions.Notrip {
 			this.groupBox6.Controls.Add( this.NumericNumber );
 			this.groupBox6.Location = new System.Drawing.Point( 641, 237 );
 			this.groupBox6.Name = "groupBox6";
-			this.groupBox6.Size = new System.Drawing.Size( 124, 166 );
+			this.groupBox6.Size = new System.Drawing.Size( 124, 144 );
 			this.groupBox6.TabIndex = 29;
 			this.groupBox6.TabStop = false;
 			this.groupBox6.Text = "Recognition";
 			// 
 			// TimerDemo
 			// 
-			this.TimerDemo.Enabled = true;
 			this.TimerDemo.Interval = 180000;
 			this.TimerDemo.Tick += new System.EventHandler( this.TimerDemo_Tick );
 			// 
+			// keyedInstrument1
+			// 
+			this.keyedInstrument1.FirstKey = ( (LothianProductions.Notrip.Tuning) ( resources.GetObject( "keyedInstrument1.FirstKey" ) ) );
+			this.keyedInstrument1.Location = new System.Drawing.Point( 26, 412 );
+			this.keyedInstrument1.MajorKeys = 24;
+			this.keyedInstrument1.Name = "keyedInstrument1";
+			this.keyedInstrument1.ShowFrequencies = false;
+			this.keyedInstrument1.ShowOctaves = false;
+			this.keyedInstrument1.Size = new System.Drawing.Size( 697, 115 );
+			this.keyedInstrument1.TabIndex = 30;
+			// 
 			// ControlForm
 			// 
-			this.ClientSize = new System.Drawing.Size( 776, 412 );
+			this.ClientSize = new System.Drawing.Size( 776, 539 );
+			this.Controls.Add( this.keyedInstrument1 );
 			this.Controls.Add( this.groupBox6 );
 			this.Controls.Add( this.groupBox5 );
 			this.Controls.Add( this.GroupWaveformPreview );
@@ -637,12 +631,13 @@ namespace LothianProductions.Notrip {
 		private System.Windows.Forms.NumericUpDown NumericNumber;
 		private System.Windows.Forms.Button ButtonRepeat;
 		private System.Windows.Forms.Button ButtonPlay;
-		private System.Windows.Forms.CheckBox CheckReveal;
 		private System.Windows.Forms.CheckBox CheckPlayDetected;
 		private System.Windows.Forms.GroupBox groupBox6;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.NumericUpDown NumericSensitivity;
 		private System.Windows.Forms.Timer TimerDemo;
+		private KeyedInstrument keyedInstrument1;
+//		private KeyedInstrument keyedInstrument1;
 
 	}
 }

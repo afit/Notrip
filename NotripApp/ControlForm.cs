@@ -198,6 +198,7 @@ namespace LothianProductions.Notrip {
 		}
 
 		private void ButtonRepeat_Click( object sender, EventArgs e ) {
+			// FIXME why does this lock the interface?
 			new Thread( new ThreadStart( PlayNotes ) ).Start();
 		}
 		
@@ -230,6 +231,10 @@ namespace LothianProductions.Notrip {
 			MessageBox.Show( this, "This test version of Notrip may only be run for three minutes. It will now shut down.\n\nA newer version might be available, let's see...", "Notrip", MessageBoxButtons.OK, MessageBoxIcon.Information );
 			System.Diagnostics.Process.Start( "http://www.lothianproductions.co.uk/notrip" );
 			Application.Exit();		
+		}
+
+		private void ComboInstrument_SelectedIndexChanged( object sender, EventArgs e ) {
+			//if(
 		}
 	}
 }

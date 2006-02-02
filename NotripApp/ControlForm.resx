@@ -174,4 +174,13 @@
   <metadata name="TimerDemo.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="keyedInstrument1.FirstKey" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAD1Ob3RyaXAsIFZlcnNpb249MS4wLjAuMCwgQ3VsdHVyZT1uZXV0
+        cmFsLCBQdWJsaWNLZXlUb2tlbj1udWxsBQEAAAAgTG90aGlhblByb2R1Y3Rpb25zLk5vdHJpcC5UdW5p
+        bmcCAAAABW1Ob3RlB21PY3RhdmUEAB5Mb3RoaWFuUHJvZHVjdGlvbnMuTm90cmlwLk5vdGUCAAAACAIA
+        AAAF/f///x5Mb3RoaWFuUHJvZHVjdGlvbnMuTm90cmlwLk5vdGUBAAAAB3ZhbHVlX18ACAIAAAAAAAAA
+        BAAAAAs=
+</value>
+  </data>
 </root>
