@@ -46,5 +46,9 @@ namespace LothianProductions.Notrip {
 		public List<String> GetOrderedNoteNames() {
 			return mOrderedNoteNames;
 		}
+		
+		public String GetNoteName( Note note ) {
+			return mOrderedNoteNames[ mOrderedNotes.IndexOf( note ) ];
+		}
 	}
 }
