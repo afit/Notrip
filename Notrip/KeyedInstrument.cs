@@ -7,116 +7,96 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace LothianProductions.Notrip {
+
 	public partial class KeyedInstrument : UserControl {
 		public KeyedInstrument() {
 			InitializeComponent();
-		}
-	}
-	
-	public class PianoForm {
-		List<BlackKey> BlackKeys = new List<BlackKey>();
-		List<WhiteKey> WhiteKeys = new List<WhiteKey>();
-
-	//	public static PianoKey CurrentKey = null;
-
-		public PianoForm() {
-	  int xpos = 20;
-	  int ypos = 125;
-	  for (int i = 0; i < 10; i ++) {
-			WhiteKeys.Add(new WhiteKey(xpos, ypos, 0));
-			xpos += WhiteKey.kWidth;
+			mMajorKeys = 24;
+			mFirstKey = new Tuning();
+			mShowOctaves = false;
+			mShowFrequencies = false;
 		}
 
-     xpos  = 20 + WhiteKey.kWidth - BlackKey.kWidth/2;
-
- 	 for (int i = 0; i < 10; i ++) {
-		 if ((i == 2) || (i==6) || (i == 9)) {
-			 // skip these
-		 } else
-			 BlackKeys.Add(new BlackKey(xpos, ypos, 0));
-		 xpos += WhiteKey.kWidth;
-
-		}
-	}
-		void DrawCurrentKey(Graphics g, WhiteKey p) {
-			Rectangle r = p.Border;
-			g.DrawRectangle(Pens.Red, r);
-		}
-
-		private void PianoForm_Paint(object sender, System.Windows.Forms.PaintEventArgs e) {
-			Graphics g = e.Graphics;
-
-			foreach (PianoKey k  in WhiteKeys)
-				k.Draw(g);
-
-			foreach (PianoKey k  in BlackKeys)
-				k.Draw(g);
-		}
-	}
-	public class WhiteKey { 
-		protected Point Position = new Point(0,0);
-		protected int Frequency = 5000;
-
-		protected Rectangle m_Border;
-
-		public Rectangle Border {
-			get{ return m_Border; }
-		}	
-		public static int kHeight = 150;
-		int kWidth  = 50;
-
-		public WhiteKey(int x, int y, int frequency) {
-			Frequency = frequency;
-			Position.X = x;
-			Position.Y = y;
-			m_Border = new Rectangle(x, y, kWidth, kHeight);
+		protected int mMajorKeys;
+		public int MajorKeys {
+			get{ return mMajorKeys; }
+			set{
+				mMajorKeys = value;
+				Invalidate();
+			}
 		}
 		
-		public void Draw (Graphics g)  {
-			if (PianoForm.CurrentKey == this)
-				g.FillRectangle(Brushes.White, Position.X, Position.Y, kWidth, kHeight);
-			else
-				g.FillRectangle(Brushes.SkyBlue, Position.X, Position.Y, kWidth, kHeight);
+		protected Tuning mFirstKey;
+		public Tuning FirstKey {
+			get{ return mFirstKey; }
+			set{
+				mFirstKey = value;
+				Invalidate();
+			}
+		}
+		
+		protected bool mShowOctaves;
+		public bool ShowOctaves {
+			get{ return mShowOctaves; }
+			set{
+				mShowOctaves = value;
+				Invalidate();
+			}
+		}
+		
+		protected bool mShowFrequencies;
+		public bool ShowFrequencies {
+			get{ return mShowFrequencies; }
+			set{
+				mShowFrequencies = value;
+				Invalidate();
+			}
+		}
+		
+		private void KeyedInstrument_Paint( object sender, PaintEventArgs e ) {
+			int keyWidth = Width / mMajorKeys;
+			int octave, step = AudioMonitor.TuningToStep( mFirstKey );
+			Graphics g = e.Graphics;
+			
+			g.DrawLine( Pens.Black, 0, 0, 0, Height );
+			
+			int i;
+			
+			for( i = keyWidth; i <= Width; i += keyWidth ) {
+				String label;
+				
+				if( ! mShowFrequencies ) {
+					label = NoteHelper.Instance().GetNoteName( AudioMonitor.StepToNote( step++, out octave ) );
+				
+					if( mShowOctaves )
+						label += octave;
+				} else
+					label = AudioMonitor.StepToFrequency( step++ ) + "";
+				
+				// Black key:
+				if( NoteHelper.Instance().GetNoteName( AudioMonitor.StepToNote( step - 1, out octave ) ).Length > 1 ) {
+					g.FillRectangle( Brushes.Black, i - (keyWidth / 3), 0, (float) (keyWidth / 1.5), Height / 2 );
+					g.DrawString( label, Font, Brushes.White, i - (g.MeasureString( label, Font ).Width / 2), (Height / 3) * 1 );
 
-
-			g.DrawRectangle(Pens.Black, Position.X, Position.Y, kWidth, kHeight);
+					if( ! mShowFrequencies ) {
+						label = NoteHelper.Instance().GetNoteName( AudioMonitor.StepToNote( step++, out octave ) );
+					
+						if( mShowOctaves )
+							label += octave;
+					} else
+						label = AudioMonitor.StepToFrequency( step++ ) + "";			
+				}
+				
+				g.DrawLine( Pens.Black, i, 0, i, Height );
+				g.DrawString( label, Font, Brushes.Black, i - (keyWidth / 2) - (g.MeasureString( label, Font ).Width / 2), (Height / 3) * 2 );
+			}
+			
+			g.DrawLine( Pens.Black, 0, 0, i - keyWidth, 0 );
+			g.DrawLine( Pens.Black, 0, Height - 1, i - keyWidth, Height - 1 );
 		}
 
-		public bool IsContained(Point p) {
-			Rectangle r = new Rectangle(Position.X, Position.Y, kWidth, kHeight);
-			if (r.Contains(p))
-				return true;
-
-			return false;
+		private void KeyedInstrument_Resize( object sender, EventArgs e ) {
+			Invalidate();
 		}
-	}
-	public class BlackKey : WhiteKey {
-		int kHeight = 130;
-		int kWidth  = 20;
-
-		public BlackKey() {
-			m_Border = new Rectangle(0, 0, kWidth, kHeight);
-		}
-
-		public BlackKey(int x, int y, int frequency) : base(x, y, frequency) {
-			m_Border = new Rectangle(x, y, kWidth, kHeight);
-		}
-
-		public void Draw (Graphics g) {
-			if (PianoForm.CurrentKey == this)
-				g.FillRectangle(Brushes.LightBlue, Position.X, Position.Y, kWidth, kHeight);
-			else
-				g.FillRectangle(Brushes.Black, Position.X, Position.Y, kWidth, kHeight);
-		}
-
-		public bool IsContained(Point p) {
-			Rectangle r = new Rectangle(Position.X, Position.Y, kWidth, kHeight);
-			if (r.Contains(p))
-				return true;
-
-			return false;
-		}
-	}
-
-	
+	}		
 }

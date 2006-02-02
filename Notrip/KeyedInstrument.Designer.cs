@@ -28,8 +28,17 @@ namespace LothianProductions.Notrip
 		/// </summary>
 		private void InitializeComponent()
 		{
-			components = new System.ComponentModel.Container();
+			this.SuspendLayout();
+			// 
+			// KeyedInstrument
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Name = "KeyedInstrument";
+			this.Resize += new System.EventHandler( this.KeyedInstrument_Resize );
+			this.Paint += new System.Windows.Forms.PaintEventHandler( this.KeyedInstrument_Paint );
+			this.ResumeLayout( false );
+
 		}
 
 		#endregion
