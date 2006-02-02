@@ -73,11 +73,16 @@ namespace LothianProductions.Notrip {
 			bufferDescription.Format = format;
 			
 			// Try to create a recording buffer using the default device to see if the format is valid.
-			mCaptureBuffer = new CaptureBuffer( bufferDescription, new Capture( new CaptureDevicesCollection()[0].DriverGuid ) );           
+			Guid defaultDeviceGuid = new CaptureDevicesCollection()[0].DriverGuid;
+			Capture capture = new Capture( defaultDeviceGuid );
+			
+			try {
+				mCaptureBuffer = new CaptureBuffer( bufferDescription, capture );
+			} catch(ApplicationException e) {
+				throw new ApplicationException( "Couldn't get access to recording device", e );
+			}
+			
 			mRunning = true;
-
-			// Create a thread to monitor the notify events
-			new Thread( new ThreadStart( Process ) ).Start();
 
 			// Setup the notification positions
 			BufferPositionNotify[] positionNotify = new BufferPositionNotify[ NO_RECORD_NOTIFICATIONS + 1 ];  
@@ -93,6 +98,9 @@ namespace LothianProductions.Notrip {
 			// Tell DirectSound when to notify the app. The notification will come in the from 
 			// of signaled events that are handled in the notify thread.
 			new Notify( mCaptureBuffer ).SetNotificationPositions( positionNotify, NO_RECORD_NOTIFICATIONS );		
+
+			// Create a thread to monitor the notify events
+			new Thread( new ThreadStart( Process ) ).Start();
 			
 			mCaptureBuffer.Start( true );
 		}
