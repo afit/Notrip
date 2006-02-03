@@ -92,7 +92,7 @@ namespace LothianProductions.Notrip {
 			
 			for( int i = 0; i < NO_RECORD_NOTIFICATIONS; i++ ) {
 				positionNotify[i].Offset = (notifySize * i) + notifySize - 1;
-				positionNotify[i].EventNotifyHandle = notificationEvent.Handle;
+				positionNotify[i].EventNotifyHandle = notificationEvent.SafeWaitHandle.DangerousGetHandle();
 			}
 			
 			// Tell DirectSound when to notify the app. The notification will come in the from 
