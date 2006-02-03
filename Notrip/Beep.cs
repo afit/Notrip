@@ -10,7 +10,7 @@ namespace LothianProductions.Notrip {
         const double TwoMathPI = 2.0 * Math.PI;
         const int NumberRecordNotifications = 4;
 		
-        private SecondaryBuffer buffa = null;
+        private Microsoft.DirectX.DirectSound.Buffer buffa = null;
         private int NextWriteOffset = 0;
         private int OutputBufferSize = 0;
         private int TimePlaying = 0;
