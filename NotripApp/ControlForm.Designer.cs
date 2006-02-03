@@ -39,6 +39,7 @@ namespace LothianProductions.Notrip {
 			this.ComboInstrument = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.InstrumentKeyed = new LothianProductions.Notrip.KeyedInstrument();
 			this.label8 = new System.Windows.Forms.Label();
 			this.NumericSensitivity = new System.Windows.Forms.NumericUpDown();
 			this.CheckPlayDetected = new System.Windows.Forms.CheckBox();
@@ -63,7 +64,6 @@ namespace LothianProductions.Notrip {
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
 			this.TimerDemo = new System.Windows.Forms.Timer(this.components);
-			this.InstrumentKeyed = new LothianProductions.Notrip.KeyedInstrument();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.NumericStrings)).BeginInit();
 			this.groupBox3.SuspendLayout();
@@ -254,6 +254,18 @@ namespace LothianProductions.Notrip {
 			this.groupBox3.TabIndex = 24;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Instrument";
+			// 
+			// InstrumentKeyed
+			// 
+			this.InstrumentKeyed.FirstKey = ((LothianProductions.Notrip.Tuning)(resources.GetObject("InstrumentKeyed.FirstKey")));
+			this.InstrumentKeyed.Location = new System.Drawing.Point(6, 86);
+			this.InstrumentKeyed.MajorKeys = 24;
+			this.InstrumentKeyed.Name = "InstrumentKeyed";
+			this.InstrumentKeyed.ShowFrequencies = false;
+			this.InstrumentKeyed.ShowOctaves = false;
+			this.InstrumentKeyed.Size = new System.Drawing.Size(651, 109);
+			this.InstrumentKeyed.TabIndex = 30;
+			this.InstrumentKeyed.Visible = false;
 			// 
 			// label8
 			// 
@@ -553,18 +565,6 @@ namespace LothianProductions.Notrip {
 			this.TimerDemo.Interval = 180000;
 			this.TimerDemo.Tick += new System.EventHandler(this.TimerDemo_Tick);
 			// 
-			// InstrumentKeyed
-			// 
-			this.InstrumentKeyed.FirstKey = ((LothianProductions.Notrip.Tuning)(resources.GetObject("InstrumentKeyed.FirstKey")));
-			this.InstrumentKeyed.Location = new System.Drawing.Point(6, 86);
-			this.InstrumentKeyed.MajorKeys = 24;
-			this.InstrumentKeyed.Name = "InstrumentKeyed";
-			this.InstrumentKeyed.ShowFrequencies = false;
-			this.InstrumentKeyed.ShowOctaves = false;
-			this.InstrumentKeyed.Size = new System.Drawing.Size(651, 109);
-			this.InstrumentKeyed.TabIndex = 30;
-			this.InstrumentKeyed.Visible = false;
-			// 
 			// ControlForm
 			// 
 			this.ClientSize = new System.Drawing.Size(776, 393);
@@ -576,7 +576,7 @@ namespace LothianProductions.Notrip {
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.MaximizeBox = false;
 			this.Name = "ControlForm";
-			this.Text = "s";
+			this.Text = "Notrip - 0.6 - See: http://www.lothianproductions.co.uk/notrip";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ControlForm_FormClosing);
 			this.Load += new System.EventHandler(this.ControlForm_Load);
 			this.groupBox1.ResumeLayout(false);
