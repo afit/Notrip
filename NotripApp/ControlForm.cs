@@ -35,7 +35,7 @@ namespace LothianProductions.Notrip {
 		private delegate void UpdateAudioDataDelegate( byte[] samples, List<Sound> sounds );
 		private void UpdateAudioData( byte[] samples, List<Sound> sounds ) {
 			mOscilloscope.AddSamples( samples );
-			InstrumentMain.Highlight( sounds, CheckPlayDetected.Checked );
+			InstrumentStringed.Highlight( sounds, CheckPlayDetected.Checked );
 			
 			// Find and plot max amplitude for volume:
 			byte max = (byte) 128;
@@ -55,7 +55,7 @@ namespace LothianProductions.Notrip {
 		}
 
 		private void CheckLefthanded_CheckedChanged( object sender, EventArgs e ) {
-			InstrumentMain.LeftHanded = CheckLefthanded.Checked;
+			InstrumentStringed.LeftHanded = CheckLefthanded.Checked;
 		}
 
 		private void NumericStrings_ValueChanged(object sender, EventArgs e) {
@@ -66,23 +66,31 @@ namespace LothianProductions.Notrip {
 				
 			List<Tuning> list = new List<Tuning>();
 			for( int i = 0; i < NumericStrings.Value; i++ )
-				if( i > InstrumentMain.Strings.Length - 1 )
+				if( i > InstrumentStringed.Strings.Length - 1 )
 					list.Add( new Tuning( Note.A, 4 ) );
 				else
-					list.Add( InstrumentMain.Strings[i] );
+					list.Add( InstrumentStringed.Strings[i] );
 
-			InstrumentMain.Strings = list.ToArray();
+			InstrumentStringed.Strings = list.ToArray();
 			UpdateInstrumentStringControls();
 		}
 		
 		protected void UpdateInstrumentStringControls() {
-			for( int i = 0; i < InstrumentMain.Strings.Length; i++ ) {
+			Tuning[] tunings;
+			
+			if( ComboInstrument.SelectedIndex == 0 ) {
+				tunings = InstrumentStringed.Strings;
+			} else {
+				tunings = new Tuning[] { InstrumentKeyed.FirstKey };
+			}
+		
+			for( int i = 0; i < tunings.Length; i++ ) {
 				// Control already exists:
 				if( mInstrumentStringTunings.Count > i ) {
-					mInstrumentStringTunings[i].Top = InstrumentMain.Top + ((InstrumentMain.Height / (InstrumentMain.Strings.Length + 1)) * (i + 1) ) - mInstrumentStringTunings[i].Height / 2;
-					mInstrumentStringOctaves[i].Top = InstrumentMain.Top + ((InstrumentMain.Height / (InstrumentMain.Strings.Length + 1)) * (i + 1) ) - mInstrumentStringOctaves[i].Height / 2;
-					mInstrumentStringTunings[i].SelectedIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( InstrumentMain.Strings[i].Note );
-					mInstrumentStringOctaves[i].Value = InstrumentMain.Strings[i].Octave;
+					mInstrumentStringTunings[i].Top = InstrumentStringed.Top + ((InstrumentStringed.Height / (tunings.Length + 1)) * (i + 1) ) - mInstrumentStringTunings[i].Height / 2;
+					mInstrumentStringOctaves[i].Top = InstrumentStringed.Top + ((InstrumentStringed.Height / (tunings.Length + 1)) * (i + 1) ) - mInstrumentStringOctaves[i].Height / 2;
+					mInstrumentStringTunings[i].SelectedIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( tunings[i].Note );
+					mInstrumentStringOctaves[i].Value = tunings[i].Octave;
 					mInstrumentStringTunings[i].Visible = true;
 					mInstrumentStringOctaves[i].Visible = true;
 				} else {
@@ -93,24 +101,24 @@ namespace LothianProductions.Notrip {
 					foreach( String note in NoteHelper.Instance().GetOrderedNoteNames() )
 					    newBox.Items.Add( note );
 					
-					newBox.Size = new Size( 40, InstrumentMain.Height / (InstrumentMain.Strings.Length + 1) );
+					newBox.Size = new Size( 40, InstrumentStringed.Height / (tunings.Length + 1) );
 					newBox.Location = new Point(
-						InstrumentMain.Location.X + InstrumentMain.Width,						
-						InstrumentMain.Top + ((InstrumentMain.Height / (InstrumentMain.Strings.Length + 1)) * (i + 1)) - newBox.Height / 2
+						InstrumentStringed.Location.X + InstrumentStringed.Width,						
+						InstrumentStringed.Top + ((InstrumentStringed.Height / (tunings.Length + 1)) * (i + 1)) - newBox.Height / 2
 					);
 					newBox.Name = "InstrumentStringTuningBox" + i;
 					
 					newBox.DropDownStyle = ComboBoxStyle.DropDownList;
-					newBox.SelectedIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( InstrumentMain.Strings[i].Note );
+					newBox.SelectedIndex = NoteHelper.Instance().GetOrderedNotes().IndexOf( tunings[i].Note );
 					
 					NumericUpDown newUpDown = new NumericUpDown();
-					newUpDown.Size = new Size( 40, InstrumentMain.Height / (InstrumentMain.Strings.Length + 1) );
+					newUpDown.Size = new Size( 40, InstrumentStringed.Height / (tunings.Length + 1) );
 					newUpDown.Location = new Point(
-						InstrumentMain.Location.X + InstrumentMain.Width + 40,
-						InstrumentMain.Top + ((InstrumentMain.Height / (InstrumentMain.Strings.Length + 1)) * (i + 1)) - newUpDown.Height / 2
+						InstrumentStringed.Location.X + InstrumentStringed.Width + 40,
+						InstrumentStringed.Top + ((InstrumentStringed.Height / (tunings.Length + 1)) * (i + 1)) - newUpDown.Height / 2
 					);
 					newUpDown.Name = "InstrumentStringOctaveNumeric" + i;
-					newUpDown.Value = InstrumentMain.Strings[i].Octave;
+					newUpDown.Value = tunings[i].Octave;
 					newUpDown.Minimum = 1;
 					newUpDown.Maximum = 8;
 					
@@ -129,15 +137,15 @@ namespace LothianProductions.Notrip {
 			}
 			
 			// Hide older controls:
-			for( int i = InstrumentMain.Strings.Length; i < mInstrumentStringTunings.Count; i++ ) {
+			for( int i = tunings.Length; i < mInstrumentStringTunings.Count; i++ ) {
 				mInstrumentStringTunings[i].Visible = false;
 				mInstrumentStringOctaves[i].Visible = false;
 			}
 			
 			List<double> frequencies = new List<double>();
 			
-			foreach( Tuning instrumentString in InstrumentMain.Strings ) {
-				for( int i = 0; i < InstrumentMain.Frets; i++ ) {
+			foreach( Tuning instrumentString in tunings ) {
+				for( int i = 0; i < (int) NumericFrets.Value; i++ ) {
 					double frequency = AudioMonitor.StepToFrequency( AudioMonitor.TuningToStep( instrumentString ) + i );
 					
 					if( ! frequencies.Contains( frequency ) )
@@ -150,31 +158,41 @@ namespace LothianProductions.Notrip {
 
 		private void ComboTuning_SelectedIndexChanged( object sender, EventArgs e ) {
 			int i = Int32.Parse( ((ComboBox) sender).Name.Substring( "InstrumentStringTuningBox".Length ) );
-			InstrumentMain.Strings[i].Note = NoteHelper.Instance().GetOrderedNotes()[ mInstrumentStringTunings[i].SelectedIndex ];
-			InstrumentMain.Invalidate();
+			
+			if( ComboInstrument.SelectedIndex == 0 ) {
+				InstrumentStringed.Strings[i].Note = NoteHelper.Instance().GetOrderedNotes()[ mInstrumentStringTunings[i].SelectedIndex ];
+				InstrumentStringed.Invalidate();
+			} else {
+				InstrumentKeyed.FirstKey.Note = NoteHelper.Instance().GetOrderedNotes()[ mInstrumentStringTunings[i].SelectedIndex ];
+				InstrumentKeyed.Invalidate();
+			}
 		}
 
 		private void NumericOctave_ValueChanged( object sender, EventArgs e ) {
 			int i = Int32.Parse( ((NumericUpDown) sender).Name.Substring( "InstrumentStringOctaveNumeric".Length ) );
-			InstrumentMain.Strings[i].Octave = (int) mInstrumentStringOctaves[i].Value;
-			InstrumentMain.Invalidate();
+			
+			if( ComboInstrument.SelectedIndex == 0 ) {
+				InstrumentStringed.Strings[i].Octave = (int) mInstrumentStringOctaves[i].Value;
+				InstrumentStringed.Invalidate();
+			} else {
+				InstrumentKeyed.FirstKey.Octave = (int) mInstrumentStringOctaves[i].Value;
+				InstrumentKeyed.Invalidate();
+			}
 		}
 
-		private void NumericFrets_ValueChanged( object sender, EventArgs e ) {
-			if( NumericStrings.Value < 1 ) {
-				NumericStrings.Value = 1;
-				return;
-			}
-		
-			InstrumentMain.Frets = (int) NumericFrets.Value;
+		private void NumericFrets_ValueChanged( object sender, EventArgs e ) {		
+			InstrumentStringed.Frets = (int) NumericFrets.Value;
+			InstrumentKeyed.MajorKeys = (int) NumericFrets.Value;
 		}
 
 		private void CheckShowFrequencies_CheckedChanged( object sender, EventArgs e ) {
-			InstrumentMain.ShowFrequencies = CheckShowFrequencies.Checked;
+			InstrumentStringed.ShowFrequencies = CheckShowFrequencies.Checked;
+			InstrumentKeyed.ShowFrequencies = CheckShowFrequencies.Checked;
 		}
 
 		private void CheckShowOctaves_CheckedChanged( object sender, EventArgs e ) {
-			InstrumentMain.ShowOctaves = CheckShowOctaves.Checked;
+			InstrumentStringed.ShowOctaves = CheckShowOctaves.Checked;
+			InstrumentKeyed.ShowOctaves = CheckShowOctaves.Checked;
 		}
 
 		private void ButtonPlay_Click( object sender, EventArgs e ) {
@@ -186,8 +204,8 @@ namespace LothianProductions.Notrip {
 				for( int i = 0; i < (int) NumericNumber.Value; i++ ) {
 					// Find range:
 					int min = 36, max = -36;
-					foreach( Tuning instrumentString in InstrumentMain.Strings ) {
-						max = Math.Max( max, AudioMonitor.TuningToStep( instrumentString ) + InstrumentMain.Frets - 1 );
+					foreach( Tuning instrumentString in InstrumentStringed.Strings ) {
+						max = Math.Max( max, AudioMonitor.TuningToStep( instrumentString ) + InstrumentStringed.Frets - 1 );
 						min = Math.Min( min, AudioMonitor.TuningToStep( instrumentString ) );
 					}
 
@@ -234,7 +252,15 @@ namespace LothianProductions.Notrip {
 		}
 
 		private void ComboInstrument_SelectedIndexChanged( object sender, EventArgs e ) {
-			//if(
+			// FIXME clean this up
+			if( ComboInstrument.SelectedIndex == 0 ) {
+				InstrumentStringed.Visible = true;
+				InstrumentKeyed.Visible = false;
+			} else {
+				InstrumentStringed.Visible = false;
+				InstrumentKeyed.Visible = true;
+			}
+			UpdateInstrumentStringControls();
 		}
 	}
 }
