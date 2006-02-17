@@ -34,15 +34,18 @@ namespace LothianProductions.Notrip {
 		
 		private delegate void UpdateAudioDataDelegate( byte[] samples, List<Sound> sounds );
 		private void UpdateAudioData( byte[] samples, List<Sound> sounds ) {
-			mOscilloscope.AddSamples( samples );
-			InstrumentStringed.Highlight( sounds, CheckPlayDetected.Checked );
-			
-			// Find and plot max amplitude for volume:
-			byte max = (byte) 128;
-			foreach( byte sample in samples )
-			    max = Math.Max( max, sample );
+			if( RadioShowWaveform.Checked ) {
+				mOscilloscope.AddSamples( samples );
+			} else if( RadioShowInstrument.Checked ) {
+				InstrumentStringed.Highlight( sounds, CheckPlayDetected.Checked );
+			} else if( RadioShowAmplitude.Checked ) {
+				// Find and plot max amplitude for volume:
+				byte max = (byte) 128;
+				foreach( byte sample in samples )
+					max = Math.Max( max, sample );
 				
-			ProgressAmplitude.Value = max;
+				ProgressAmplitude.Value = max;
+			}
 		}
 		public void ProcessAudioData( byte[] samples, List<Sound> sounds ) {
 			try {
@@ -261,6 +264,45 @@ namespace LothianProductions.Notrip {
 				InstrumentKeyed.Visible = true;
 			}
 			UpdateInstrumentStringControls();
+		}
+
+        private void RadioDrawAudio_CheckedChanged( object sender, EventArgs e ) {
+
+        }
+
+		private void RadioShowInstrument_CheckedChanged( object sender, EventArgs e ) {
+			if( ComboInstrument.SelectedIndex == 0 ) {
+				InstrumentStringed.Visible = true;
+				InstrumentKeyed.Visible = false;
+			} else {
+				InstrumentStringed.Visible = false;
+				InstrumentKeyed.Visible = true;
+			}
+						
+			mOscilloscope.Visible = false;
+			ProgressAmplitude.Visible = false;
+		}
+
+		private void RadioShowWaveform_CheckedChanged( object sender, EventArgs e ) {
+			InstrumentStringed.Visible = false;
+			InstrumentKeyed.Visible = false;
+			mOscilloscope.Visible = true;
+			ProgressAmplitude.Visible = false;
+		}
+
+		private void RadioShowAmplitude_CheckedChanged( object sender, EventArgs e ) {
+			InstrumentStringed.Visible = false;
+			InstrumentKeyed.Visible = false;
+			mOscilloscope.Visible = false;
+			ProgressAmplitude.Visible = true;
+		}
+
+		private void NumericNotesCount_ValueChanged( object sender, EventArgs e ) {
+			AudioMonitor.Instance().NotesCount = (int) NumericNotesCount.Value;
+		}
+
+		private void CheckMatchExact_CheckedChanged( object sender, EventArgs e ) {
+			AudioMonitor.Instance().MatchExact = CheckMatchExact.Checked;
 		}
 	}
 }
