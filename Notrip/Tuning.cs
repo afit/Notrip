@@ -7,24 +7,25 @@ namespace LothianProductions.Notrip {
 	
 	[Serializable()]
 	public class Tuning {
-	
+	//	Note note,
+	//	int octave
 		public Tuning() {}
 	
 		public Tuning( Note note, int octave ) {
-			mNote = note;
-			mOctave = octave;
+		    mNote = note;
+		    mOctave = octave;
 		}
 	
 		protected Note mNote = Note.A;
 		public Note Note {
-			get{ return mNote; }
-			set{ mNote = value; }
+		    get{ return mNote; }
+		    set{ mNote = value; }
 		}
 		
 		protected int mOctave = 4;
 		public int Octave {
-			get{ return mOctave; }
-			set{ mOctave = value; }
+		    get{ return mOctave; }
+		    set{ mOctave = value; }
 		}
 	}
 }

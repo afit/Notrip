@@ -46,6 +46,18 @@ namespace LothianProductions.Notrip {
 			set{ mSensitivity = value; }
 		}
 		
+		protected int mNotesCount = 6;
+		public int NotesCount {
+			get{ return mNotesCount; }
+			set{ mNotesCount = value; }
+		}
+
+		protected bool mMatchExact = true;
+		public bool MatchExact {
+			get{ return mMatchExact; }
+			set{ mMatchExact = value; }
+		}
+		
 		protected bool mRunning = false;
 		public bool IsRunning {
 			get{ return mRunning; }
@@ -144,22 +156,23 @@ namespace LothianProductions.Notrip {
 				nextCaptureOffset += captureData.Length; 
 				nextCaptureOffset %= mCaptureBufferSize; // Circular buffer
 
-				AudioDataUpdate( captureData, SamplesToSounds( captureData, mFrequencies ) );
+				if( MatchExact )
+					AudioDataUpdate( captureData, ExtractExactFrequencies( captureData, mFrequencies, mSensitivity, mNotesCount ) );
+				else
+					AudioDataUpdate( captureData, ExtractInexactFrequencies( captureData, mSensitivity, mNotesCount ) );
 			} while( mRunning );
 		}
 		
-		public List<Sound> SamplesToSounds( byte[] samples, List<double> frequencies ) {
+		public static List<Sound> ExtractExactFrequencies( byte[] samples, List<double> frequencies, int sensitivity, int notesCount ) {
 		    // Spectral analysis:
-		    float twoT = ((float) samples.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
+		    double twoT = (Math.PI / samples.Length) * ((double) samples.Length / (double) AudioMonitor.SAMPLE_RATE) * 2d;
 			
 		    Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
 		    double firstSummation, secondSummation;
-		    double twoPInjk = Math.PI / samples.Length * 4d;
 
 		    foreach( double frequency in frequencies ) {
 		        firstSummation = 0; secondSummation = 0;
-		        // Fix the frequency: int = double oldJ = ((frequency / 4d) * twoT);// / twoPInjk;
-		        double next = ((frequency / 4d) * twoT) * twoPInjk;
+		        double next = frequency * twoT;
 
 		        for( int k = 0; k < samples.Length / 2; k++ ) {
 		            double byK = next * k;
@@ -167,11 +180,11 @@ namespace LothianProductions.Notrip {
 		            secondSummation += samples[k] * Math.Sin(byK);
 		        }
 				
-		        double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
+		        double amp = Math.Abs( Math.Sqrt( Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2) ) );
 		        int amplitude = (int) ((amp / (double) samples.Length) * 4d);
 		        //Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency );
 				
-		        if( amplitude > mSensitivity ) {
+		        if( amplitude > sensitivity ) {
 		            double compensation;
 		            int octave;
 		            int step = FrequencyToStep( frequency, out compensation );
@@ -179,23 +192,23 @@ namespace LothianProductions.Notrip {
 					//Console.WriteLine( "Amplitude: " + amplitude + ", Frequency: " + frequency + ", Step: " + step + ", Compensation: " + compensation + ", Note: " + note + octave );
 		            Sound sound = new Sound( note, octave, step, amplitude, compensation );
 					
-		            if( sounds.ContainsKey( step ) )
-		                sounds[ step ].Amplitude += amplitude;
-		            else
+					if( sounds.ContainsKey( step ) )
+						sounds[ step ].Amplitude += amplitude;
+					else
 		                sounds.Add( step, sound );
 		        }
 		    }
-			
-		    return new List<Sound>( sounds.Values );
+		    
+			return ExtractTopSounds( sounds, notesCount );
 		}
 		
-		public List<Sound> SamplesToSounds( byte[] samples ) {
+		public static List<Sound> ExtractInexactFrequencies( byte[] samples, int sensitivity, int notesCount) {
 		    // Spectral analysis:
 		    float twoT = ((float) samples.Length / (float) AudioMonitor.SAMPLE_RATE) * 2f;
 			
 		    Dictionary<int, Sound> sounds = new Dictionary<int, Sound>();
 		    double firstSummation, secondSummation;
-		    double twoPInjk = Math.PI / samples.Length * 4d;
+			double twoPInjk = Math.PI / samples.Length * 4d;
 
 		    for( int j = 0; j < samples.Length / 4; j++ ) {
 		        firstSummation = 0; secondSummation = 0;
@@ -210,7 +223,7 @@ namespace LothianProductions.Notrip {
 		        double amp = Math.Abs( Math.Sqrt(Math.Pow(firstSummation, 2) + Math.Pow(secondSummation, 2)) );
 		        int amplitude = (int) ((amp / (double) samples.Length) * 4d);
 
-		        if( j > 0 && amplitude > 5 ) {
+		        if( j > 0 && amplitude > sensitivity ) {
 		            double compensation;
 		            double frequency = (j / twoT) * 4d;
 		            int octave;
@@ -225,7 +238,20 @@ namespace LothianProductions.Notrip {
 		                sounds.Add( step, sound );
 		        }
 		    }
-			
+
+		    return ExtractTopSounds( sounds, notesCount );
+		}
+		
+		public static List<Sound> ExtractTopSounds( Dictionary<int, Sound> sounds, int notesCount ) {
+			Sound[] primSounds = new List<Sound>( sounds.Values ).ToArray();
+		    Array.Sort<Sound>( primSounds, new SoundAmplitudeComparer() );
+		    
+		    if( notesCount == 0 || primSounds.Length <= notesCount )
+				return new List<Sound>( primSounds );
+				
+		    Sound[] retSounds = new Sound[ notesCount ];
+		    Array.Copy( primSounds, primSounds.Length - notesCount, retSounds, 0, notesCount );
+		
 		    return new List<Sound>( sounds.Values );
 		}
 
@@ -299,5 +325,11 @@ namespace LothianProductions.Notrip {
 				new Thread( new ThreadStart( beep.Start ) ).Start();
 			}
 		}
+	}
+	
+	public class SoundAmplitudeComparer : IComparer<Sound> {
+		public int Compare( Sound first, Sound second ) {
+			return first.Amplitude.CompareTo( second.Amplitude );
+		}	
 	}
 }

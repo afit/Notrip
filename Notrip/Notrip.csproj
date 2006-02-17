@@ -46,6 +46,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Beep.cs" />
+    <Compile Include="KeyedInstrument.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="KeyedInstrument.Designer.cs">
+      <DependentUpon>KeyedInstrument.cs</DependentUpon>
+    </Compile>
     <Compile Include="Note.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -56,6 +62,10 @@
       <DependentUpon>Oscilloscope.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="KeyedInstrument.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>KeyedInstrument.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Oscilloscope.resx">
       <DependentUpon>Oscilloscope.cs</DependentUpon>
       <SubType>Designer</SubType>
