@@ -88,6 +88,11 @@ namespace LothianProductions.Notrip {
             }
         }
 
+        protected bool mHighlightOnce = true;
+        public bool HighlightOnce {
+            get { return mHighlightOnce; }
+        }
+
 		protected List<Sound> mPreviousSounds = new List<Sound>();
 		public void Highlight( List<Sound> sounds, bool playHighlighted ) {
 			foreach( Sound sound in mPreviousSounds ) {
@@ -104,6 +109,9 @@ namespace LothianProductions.Notrip {
 			                fret = mFrets - fret;
 							
 			            DrawFingering( Graphics.FromHwnd( Handle ), instrumentString + 1, fret, Brushes.White );
+
+                        if( mHighlightOnce )
+                            break;
 			        }
 			    }
 			}
@@ -125,6 +133,9 @@ namespace LothianProductions.Notrip {
 			                Graphics.FromHwnd( Handle ), instrumentString + 1, fret,
 			                new SolidBrush( Color.FromArgb( 255, 255 - (sound.Amplitude >= 64 ? 255 : sound.Amplitude * 4), 255 - (sound.Amplitude >= 64 ? 255 : sound.Amplitude * 4) ) )
 			            );
+
+                        if (mHighlightOnce)
+                            break;
 			        }
 			    }
 			}
